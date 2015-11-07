@@ -672,7 +672,6 @@ namespace wiz
 		// void Do( const string& cmd );
 	};
 }
-using namespace MGL;
 
 /*
 void print(const Item<int>& item)
