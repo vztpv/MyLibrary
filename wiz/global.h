@@ -160,7 +160,7 @@ namespace wiz{
     /// PASC_PEE, PDSC_PEE, PNOT_EE, PEE_SAME_VALUE, PNOT_EE_SAME_VALUE
     /// LEFT_HAS_SMALL_VALUE, LEFT_HAS_LARGE_VALUE, PLEFT_HAS_SMALL_VALUE, PLEFT_HAS_LARGE_VALUE
 
-	template <class T, class COMP = ASC<T>, class COMP2 = ASC<int>, class EE = EE<T> >
+	template <class T, class COMP = ASC<T>, class COMP2 = ASC<int>, class EE = EE<T> > /// 순서 바꾸기? - 2015.07.18
 	class WrapForInfinity
 	{
 		enum Op{ MIF = 0, GR = 1, IF = 2 };
@@ -393,5 +393,19 @@ namespace wiz{
         throw string( "unsupport type : double, class, and etc..." );
     }
 
+    class wizObject
+    {
+    private:
+    public:
+        wizObject() { }
+        wizObject( const wizObject& object ) { }
+
+        virtual ~wizObject() { }
+
+        virtual string toString()const=0;
+        //virtual void initial( const wizObject& object )=0;
+        virtual wizObject& operator=( const wizObject& object ) { return *this; }
+        virtual wizObject* clone()const=0;
+    }; // move to global.h?
 }
 #endif
