@@ -3,7 +3,7 @@
 
 /// #define BTREE_DEBUG /// B_PLUS_TREE_DEBUG ?
 /// BTree<KEY,DATA,COMP,EE> /// COMP : key1 < key2, EE : key1 == key2
-/// B+ Tree!
+/// B+ Tree!, online?
 #include <vector>
 #include <wiz/sArrays.h>
 
