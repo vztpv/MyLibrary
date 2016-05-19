@@ -3,7 +3,7 @@
 
 /// #define BTREE_DEBUG /// B_PLUS_TREE_DEBUG ?
 /// BTree<KEY,DATA,COMP,EE> /// COMP : key1 < key2, EE : key1 == key2
-/// B+ Tree!, online?
+
 #include <vector>
 #include <wiz/sArrays.h>
 
@@ -233,7 +233,7 @@ public:
         }
         return bTemp;
     }
-    bool removeFromKey( const KEY key ) /// rightChildë¥¼ ì§€ìš´ë‹¤.
+    bool removeFromKey( const KEY key ) /// rightChild¸¦ Áö¿î´Ù.
     {
         return arr->removeFromIndex( arr->getDataIndexFromKey( key ) );
     }
@@ -275,10 +275,10 @@ public:
     }
 
     B_Internal_Node<KEY,DATA,COMP,EE>* Left()const///or use friend??
-    { /// emptyì¼ ë•Œ, keyë¥¼ ì´ìš©í•œë‹¤.?
+    { /// emptyÀÏ ¶§, key¸¦ ÀÌ¿ëÇÑ´Ù.?
         return left;
     }
-    B_Internal_Node<KEY,DATA,COMP,EE>* Right()const{ /// emptyì¼ ë•Œ, keyë¥¼ ì´ìš©í•œë‹¤.?
+    B_Internal_Node<KEY,DATA,COMP,EE>* Right()const{ /// emptyÀÏ ¶§, key¸¦ ÀÌ¿ëÇÑ´Ù.?
         return right;
     }
 public:
@@ -286,11 +286,11 @@ public:
     *
     */
     /// moveToOtherB_Terminal_Node
-    /// left or right í•©ì¹˜ê¸°
+    /// left or right ÇÕÄ¡±â
 private:
     B_Internal_Node<KEY,DATA,COMP,EE>* divide( const int index ){
         B_Internal_Node<KEY,DATA,COMP,EE>* temp = new B_Internal_Node<KEY,DATA,COMP,EE>( arr->divide(index) );
-        // childë“¤ì˜ parentë¥¼ tempë¡œ í•œë‹¤.
+        // childµéÀÇ parent¸¦ temp·Î ÇÑ´Ù.
         for( int i=0;i < temp->arr->getPtrNum();i++ )
         {
             temp->arr->getConstArray()[i].data->setParent( temp );
@@ -361,7 +361,7 @@ B_Internal_Node<KEY,DATA,COMP,EE>* B_Internal_Node<KEY,DATA,COMP,EE>::moveUp()
     // and divide
     temp = this->divide( index );
 
-    // childë“¤ì˜ parentë“¤ì„ ë°”ê¾¼ë‹¤.
+    // childµéÀÇ parentµéÀ» ¹Ù²Û´Ù.
     // checkNULL
     ///assertNotNULL( temp );
     // and ( make B_Internal_Node<KEY,DATA,COMP,EE>* ) optionally,
@@ -439,7 +439,7 @@ public:
         /** Done
         * // if root != NULL
         * // find empty B_Node, while ->right !=NULL delete,
-        * // find ìœ„ B_Nodeì˜ parent, also do same..
+        * // find À§ B_NodeÀÇ parent, also do same..
         * // while parent is not root
         * // then delete root.
         */
@@ -525,7 +525,7 @@ private:
         }
         return static_cast<B_Terminal_Node<KEY,DATA,COMP,EE>*>( temp );
     }
-    // leftì— rightë¥¼ í•©ì³ì„œ leftë¥¼ ë¦¬í„´í•œë‹¤.
+    // left¿¡ right¸¦ ÇÕÃÄ¼­ left¸¦ ¸®ÅÏÇÑ´Ù.
     B_Terminal_Node<KEY,DATA,COMP,EE>* unionB_Terminal_Node( B_Terminal_Node<KEY,DATA,COMP,EE>* left )
     {
         // right = left->Right();
@@ -702,10 +702,10 @@ bool BTree<KEY,DATA,COMP,EE>::insert( const KEY& key, const DATA& data )
     return isOk;
 }
 /** To Do
-*  removeì¸ ê²½ìš°ëŠ” Terminalì—ì„œë§Œ removeí•˜ê±°ë‚˜ ì‹¤ì œë¡œ ì§€ìš°ê±°ë‚˜ .. ??
+*  removeÀÎ °æ¿ì´Â Terminal¿¡¼­¸¸ removeÇÏ°Å³ª ½ÇÁ¦·Î Áö¿ì°Å³ª .. ??
 */
 template <class KEY, class DATA, class COMP, class EE>
-bool BTree<KEY,DATA,COMP,EE>::remove( const KEY& key ) // const KEY key, const int condSize // í•©ì¹  ì¡°ê±´??
+bool BTree<KEY,DATA,COMP,EE>::remove( const KEY& key ) // const KEY key, const int condSize // ÇÕÄ¥ Á¶°Ç??
 {
     bool bTemp = true;
 
@@ -739,7 +739,7 @@ bool BTree<KEY,DATA,COMP,EE>::remove( const KEY& key ) // const KEY key, const i
     // case 1 remove root
     if( bTemp && isRoot( terminal ) && terminal->isEmpty() )
     {
-        // terminalë¥¼ ì§€ìš´ë‹¤. nullë¡œ ì„¤ì •.
+        // terminal¸¦ Áö¿î´Ù. null·Î ¼³Á¤.
         removeTree();
     }
     // case 2 remove B_Node?
@@ -748,12 +748,12 @@ bool BTree<KEY,DATA,COMP,EE>::remove( const KEY& key ) // const KEY key, const i
         // chk condition
         if( !isRoot( terminal ) )// not root -> must have friend !
         {
-            if( terminalParent->getKeyNum() > 1 // ìœ—ë¶€ë¶„(internal)ì€ í•­ìƒ ë‚¨ê¸´ë‹¤.
+            if( terminalParent->getKeyNum() > 1 // À­ºÎºĞ(internal)Àº Ç×»ó ³²±ä´Ù.
 			&& ( terminalFriend->getEfficiency() < efficiency
 			|| terminal->getEfficiency() < efficiency  // efficiency condition
             )
-            && terminal->getDataNum() + terminalFriend->getDataNum() <= fanout ) // í•©ì¹˜ê¸° ìœ„í•œ ì¡°ê±´
-            //  ë‘ê°œì˜ terminalë¥¼ í•©ì¹œë‹¤.
+            && terminal->getDataNum() + terminalFriend->getDataNum() <= fanout ) // ÇÕÄ¡±â À§ÇÑ Á¶°Ç
+            //  µÎ°³ÀÇ terminal¸¦ ÇÕÄ£´Ù.
             {
                 B_Terminal_Node<KEY,DATA,COMP,EE>* leftTemp;
                 B_Terminal_Node<KEY,DATA,COMP,EE>* rightTemp;
@@ -773,21 +773,21 @@ bool BTree<KEY,DATA,COMP,EE>::remove( const KEY& key ) // const KEY key, const i
 
                 unionB_Terminal_Node( leftTemp );
                 if( rightTemp == last_node ) { last_node = leftTemp; }
- //  ë‘ê°œì˜ terminalë“¤ì˜ ë¶€ëª¨ë¥¼ ì²˜ë¦¬í•œë‹¤.
+ //  µÎ°³ÀÇ terminalµéÀÇ ºÎ¸ğ¸¦ Ã³¸®ÇÑ´Ù.
                 if( !terminalParent->removeFromIndex( tpIndex ) )
                 {
                 }
 
-                // leftTempì™€ rightTempì˜ rightì— ëŒ€í•œ ì…‹íŒ….
+                // leftTemp¿Í rightTempÀÇ right¿¡ ´ëÇÑ ¼ÂÆÃ.
                 leftTemp->setRight( rightTemp->Right() );
                 if( NULL != rightTemp->Right() )
                 {
                     rightTemp->Right()->setLeft( leftTemp );
                 }
 
-                // rightë¥¼ ì œê±°í•œë‹¤.
+                // right¸¦ Á¦°ÅÇÑ´Ù.
                 delete rightTemp; rightTemp = NULL;
-                // terminalParentê°€ emptyì¸ê²½ìš°. and root
+                // terminalParent°¡ emptyÀÎ°æ¿ì. and root
                 if( terminalParent->isEmpty() && isRoot( terminalParent ) ) // case 3
                 {
                     delete terminalParent; terminalParent = NULL;
@@ -798,7 +798,7 @@ bool BTree<KEY,DATA,COMP,EE>::remove( const KEY& key ) // const KEY key, const i
             {
                 B_Internal_Node<KEY,DATA,COMP,EE>* tpParent = terminalParent;
 
-                while( !isRoot( tpParent ) ) // rootê°€ ì•„ë‹ˆë©´, í•­ìƒ parentê°€ ìˆì–´ì•¼ í•œë‹¤.
+                while( !isRoot( tpParent ) ) // root°¡ ¾Æ´Ï¸é, Ç×»ó parent°¡ ÀÖ¾î¾ß ÇÑ´Ù.
                 {
                     B_Internal_Node<KEY,DATA,COMP,EE>* tpFriend = NULL;
                     B_Internal_Node<KEY,DATA,COMP,EE>* tpLeftTemp = NULL;
@@ -832,23 +832,23 @@ bool BTree<KEY,DATA,COMP,EE>::remove( const KEY& key ) // const KEY key, const i
                     {
                         int leftN = tpLeftTemp->getDataNum();
 
-                        //  leftì™€ rightë¥¼ í•©ì¹œë‹¤.
+                        //  left¿Í right¸¦ ÇÕÄ£´Ù.
                         unionB_Internal_Node( tpLeftTemp );
 
 
-                        ///  ë‘ê°œì˜ Internalë“¤ì˜ ë¶€ëª¨ë¥¼ ì²˜ë¦¬í•œë‹¤. /// chk.. == 1, then remove root!!
+                        ///  µÎ°³ÀÇ InternalµéÀÇ ºÎ¸ğ¸¦ Ã³¸®ÇÑ´Ù. /// chk.. == 1, then remove root!!
                         {
                             tpParent->getParent()->removeFromIndex( tppIndex ); /// chk!! why -1?
                         }
 
-                         //leftTempì™€ rightTempì˜ rightì— ëŒ€í•œ ì…‹íŒ….
+                         //leftTemp¿Í rightTempÀÇ right¿¡ ´ëÇÑ ¼ÂÆÃ.
                         tpLeftTemp->setRight( tpRightTemp->Right() );
                         if( NULL != tpRightTemp->Right() )
                         {
                             tpRightTemp->Right()->setLeft( tpLeftTemp );
                         }
 
-                        //  rightë¥¼ ì§€ìš´ë‹¤.
+                        //  right¸¦ Áö¿î´Ù.
                         delete tpRightTemp; tpRightTemp = NULL;
                     }
 
@@ -862,7 +862,7 @@ bool BTree<KEY,DATA,COMP,EE>::remove( const KEY& key ) // const KEY key, const i
     return bTemp;
 }
 template <class KEY, class DATA, class COMP, class EE>
-bool BTree<KEY,DATA,COMP,EE>::getData( const KEY& key, DATA& data )const // return ì£¼ì†Œ! nullì´ë©´ ì—†ë‹¤?
+bool BTree<KEY,DATA,COMP,EE>::getData( const KEY& key, DATA& data )const // return ÁÖ¼Ò! nullÀÌ¸é ¾ø´Ù?
 {
     // NULL ROOT
     if( NULL == root ){ return false; }
