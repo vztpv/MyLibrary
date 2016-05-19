@@ -26,7 +26,7 @@ namespace wiz{
 	#define NOT !
 	#define EQUAL ==
 
-
+	/*
     template <class T>
     inline T max( const T& t1, const T& t2 )
     {
@@ -40,6 +40,7 @@ namespace wiz{
         if( t1 < t2 ) { return t1; }
         return t2;
     }
+	*/
     ///
     template <class T>
     class STD_SWAP
@@ -392,20 +393,13 @@ namespace wiz{
         }
         throw string( "unsupport type : double, class, and etc..." );
     }
-
-    class wizObject
-    {
-    private:
-    public:
-        wizObject() { }
-        wizObject( const wizObject& object ) { }
-
-        virtual ~wizObject() { }
-
-        virtual string toString()const=0;
-        //virtual void initial( const wizObject& object )=0;
-        virtual wizObject& operator=( const wizObject& object ) { return *this; }
-        virtual wizObject* clone()const=0;
-    }; // move to global.h?
+	inline int getFirstIndex(const string& str, const char ch)
+	{
+		for (int i = 0; i < str.size(); ++i)
+		{
+			if (ch == str[i]) { return i; }
+		}
+		return -1;
+	}
 }
 #endif

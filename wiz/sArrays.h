@@ -75,7 +75,7 @@ class ExtendArray
         explicit ExtendArray( const int arraySize=1 );
         virtual ~ExtendArray();
     public:
-         bool insert( const KEY& key, const DATA& data, const bool onlyOne=true ); /** only one - ê°™ì€ dataëŠ” í•œê°œ ë§Œ  */
+         bool insert( const KEY& key, const DATA& data, const bool onlyOne=true ); /** only one - °°Àº data´Â ÇÑ°³ ¸¸  */
          bool removeFromKey( const KEY key )
         {
             if( !isExist( key ) ){ return false; }
@@ -140,7 +140,7 @@ class ExtendArray
         bool isEmpty()const{ return 0 >= num; }
 
         ExtendArray<KEY,DATA,COMP,EE>* divide( const int index ){ return split( index, getNum()-1 ); }
-        ExtendArray<KEY,DATA,COMP,EE>* split( const int sIndex, const int eIndex ); /**  ê¹Œì§€ë¥¼ ë”°ë¡œ ë–¼ì–´ë‚¸ë‹¤.,ì—ëŸ¬ëŠ” return NULL */
+        ExtendArray<KEY,DATA,COMP,EE>* split( const int sIndex, const int eIndex ); /**  ±îÁö¸¦ µû·Î ¶¼¾î³½´Ù.,¿¡·¯´Â return NULL */
         // todo - merge..?
         bool insert( const ExtendArray<KEY,DATA,COMP,EE>& ea )
         {
@@ -153,7 +153,7 @@ class ExtendArray
         }
     protected:
         void addNum( const int offset ){ num = num + offset; }
-        void sort(); /** ê°€ì§œ sort - sortì¸ ê²ƒì²˜ëŸ¼ ë³´ì¸ë‹¤. */ // Asc Ascending order
+        void sort(); /** °¡Â¥ sort - sortÀÎ °ÍÃ³·³ º¸ÀÎ´Ù. */ // Asc Ascending order
     public:
         int search( const KEY& key )const /** -1 : notFound */
         {
@@ -168,7 +168,7 @@ template <class KEY, class DATA, class COMP, class EE>
 ExtendArray<KEY,DATA,COMP,EE>::ExtendArray( const int arraySize )
 {
     #ifdef SARRAYS_DEBUG
-    checkUnderError( 0, arraySize, 1 ); // 1ë³´ë‹¤ ì‘ìœ¼ë©´ ì—ëŸ¬.
+    checkUnderError( 0, arraySize, 1 ); // 1º¸´Ù ÀÛÀ¸¸é ¿¡·¯.
     #endif
     arr = Array< SNode<KEY,DATA> >( arraySize );
     num = 0;
@@ -226,7 +226,7 @@ int ExtendArray<KEY,DATA,COMP,EE>::search( int left, int right, const KEY& key )
     return  -2;
 }
 template <class KEY, class DATA, class COMP, class EE>
-void ExtendArray<KEY,DATA,COMP,EE>::sort() // ì˜¤ë¦„ì°¨ìˆœ,  cf) ë‚´ë¦¼ì°¨ìˆœ.
+void ExtendArray<KEY,DATA,COMP,EE>::sort() // ¿À¸§Â÷¼ø,  cf) ³»¸²Â÷¼ø.
 {
     if( num <= 1 ){ return; }
     SNode<KEY, DATA> temp;
@@ -237,7 +237,7 @@ void ExtendArray<KEY,DATA,COMP,EE>::sort() // ì˜¤ë¦„ì°¨ìˆœ,  cf) ë‚´ë¦¼ì°¨ìˆœ.
     //
     for( int i = num-1; i >= 1; i-- )
     {
-        // ì˜¤ë¦„ì°¨ìˆœ..
+        // ¿À¸§Â÷¼ø..
         //if( getConstArray()[i-1].key > temp.key )
         if( COMP() ( temp.key, getConstArray()[i-1].key ) )
         {
@@ -323,13 +323,13 @@ ExtendArray<KEY,DATA,COMP,EE>* ExtendArray<KEY,DATA,COMP,EE>::split( const int s
 }
 
 template <class KEY, class DATA, class COMP, class EE> /// type of DATA is pointer!!
-class PtrArray  /// ìƒì† ëŒ€ì‹ , has?
+class PtrArray  /// »ó¼Ó ´ë½Å, has?
 /// PtrArray has ExtendArray..??
 {
     private:
         int arraySize;
     private:
-        // ë³µì‚¬, ëŒ€ì… ê¸ˆì§€??
+        // º¹»ç, ´ëÀÔ ±İÁö??
         PtrArray( const PtrArray<KEY,DATA,COMP,EE>& eq );
         //DONOTCOPY( PtrArray )
         PtrArray<KEY,DATA,COMP,EE>& operator=( const PtrArray<KEY,DATA,COMP,EE>& eq );
@@ -339,7 +339,7 @@ class PtrArray  /// ìƒì† ëŒ€ì‹ , has?
         explicit PtrArray( const int arraySize ):arraySize(arraySize) { extendArray = ExtendArray<KEY,DATA,COMP,EE>( arraySize ); }
         virtual ~PtrArray(){  }
     public:
-        /// ë§¨ ì²˜ìŒ NonTerminalSNodeì— ë„£ì„ë•Œ ì•„ë˜ í•¨ìˆ˜ë¥¼ í˜¸ì¶œ
+        /// ¸Ç Ã³À½ NonTerminalSNode¿¡ ³ÖÀ»¶§ ¾Æ·¡ ÇÔ¼ö¸¦ È£Ãâ
         bool insert( const KEY& key, const DATA& data, const DATA& data2 ) /// data not bool!
         {
             #ifdef SARRAYS_DEBUG
@@ -350,28 +350,28 @@ class PtrArray  /// ìƒì† ëŒ€ì‹ , has?
             temp = temp && extendArray.insert( key, data2, false );
             return temp;
         }
-        /// ë‘ë²ˆì§¸ë¶€í„° key,dataë¥¼ ë„£ì„ë•ŒëŠ” ì¼ë°˜ì ìœ¼ë¡œ í•œë‹¤.
-         bool insert( const KEY& key, const DATA& data, const bool isSplit=false, const bool onlyOne=true ) /** only one - ê°™ì€ dataëŠ” í•œê°œ ë§Œ  */
+        /// µÎ¹øÂ°ºÎÅÍ key,data¸¦ ³ÖÀ»¶§´Â ÀÏ¹İÀûÀ¸·Î ÇÑ´Ù.
+         bool insert( const KEY& key, const DATA& data, const bool isSplit=false, const bool onlyOne=true ) /** only one - °°Àº data´Â ÇÑ°³ ¸¸  */
         {
             #ifdef SARRAYS_DEBUG
             assertNotEquals<int>( "second~insert", getPtrNum(), 0 );
             #endif
 
             bool temp = extendArray.insert( key, data, onlyOne ); //
-            /// ìœ„ì˜ insertì—ì„œ onlyone == true and, ê°€ì¥ í° keyê°’ì´ ìê¸° ìì‹ ì´ë¼ë©´,
+            /// À§ÀÇ insert¿¡¼­ onlyone == true and, °¡Àå Å« key°ªÀÌ ÀÚ±â ÀÚ½ÅÀÌ¶ó¸é,
             //if( temp && key == extendArray.getConstArray()[getPtrNum()-1].key ){
             if( temp && EE() ( key, extendArray.getConstArray()[getPtrNum()-1].key ) )
             {
-                /// í•­ìƒ ê°€ì¥ í° keyê°’ë§Œ 2ë²ˆ ë‚˜ì˜¤ë„ë¡ í•œë‹¤.!!!
+                /// Ç×»ó °¡Àå Å« key°ª¸¸ 2¹ø ³ª¿Àµµ·Ï ÇÑ´Ù.!!!
                 extendArray.getArray()[getPtrNum()-2].key = extendArray.getConstArray()[getPtrNum()-1].key;
             }
             /** To Do
             *  change function name?
             */
-            //if( !isSplit && temp && key != extendArray.getConstArray()[getPtrNum()-1].key ){ // shiftê°€ í•˜ë‚˜ë¼ë„ ì¼ì–´ë‚œë‹¤ë©´..
+            //if( !isSplit && temp && key != extendArray.getConstArray()[getPtrNum()-1].key ){ // shift°¡ ÇÏ³ª¶óµµ ÀÏ¾î³­´Ù¸é..
             if( !isSplit && temp && (!EE()( key, extendArray.getConstArray()[getPtrNum()-1].key) ) )
             {
-                // ì˜¤ë¥¸ìª½ì˜ DATAê³¼ ë°”ê¾¼ë‹¤.- !isSplit?
+                // ¿À¸¥ÂÊÀÇ DATA°ú ¹Ù²Û´Ù.- !isSplit?
                 const int index = getKeyIndexFromKey( key );
                 DATA dTemp = extendArray.getConstArray()[index].data;
                 extendArray.getArray()[index].data = extendArray.getConstArray()[index+1].data;
@@ -379,26 +379,26 @@ class PtrArray  /// ìƒì† ëŒ€ì‹ , has?
             }
             return temp;
         }
-         bool removeFromIndex( const int index ) // key ê¸°ì¤€..
+         bool removeFromIndex( const int index ) // key ±âÁØ..
         {
             const int offset = -1;
 
             #ifdef SARRAYS_DEBUG
-            checkIndexError( index, getPtrNum() ); /// emptyì¼ë•Œ, ì§€ìš°ë©´ ì˜ˆì™¸ë¥¼ ë˜ì§„ë‹¤.
-            assertNotEquals<int>( "remove", getPtrNum(), 1 ); /// 0ê°œ, 2ê°œ,3ê°œ,4ê°œ...
+            checkIndexError( index, getPtrNum() ); /// emptyÀÏ¶§, Áö¿ì¸é ¿¹¿Ü¸¦ ´øÁø´Ù.
+            assertNotEquals<int>( "remove", getPtrNum(), 1 ); /// 0°³, 2°³,3°³,4°³...
             #endif
 
             if( getPtrNum() == 2 ){
                 return extendArray.removeFromIndex( 0 ) && extendArray.removeFromIndex( 0 );
             }
-            else if( index == getPtrNum()-1 ) /// ë§ˆì§€ë§‰ ë…¸ë“œ ( , ë§ˆì§€ë§‰ ë…¸ë“œ-1 : keyê°’ì´ ì¤‘ë³µë˜ëŠ” ìœ ì¼í•œ ê²½ìš° ).
+            else if( index == getPtrNum()-1 ) /// ¸¶Áö¸· ³ëµå ( , ¸¶Áö¸· ³ëµå-1 : key°ªÀÌ Áßº¹µÇ´Â À¯ÀÏÇÑ °æ¿ì ).
             {
                 bool temp = extendArray.removeFromIndex( index );
                 if( temp ){ extendArray.getArray()[getPtrNum()-1].key = extendArray.getConstArray()[getPtrNum()-2].key; }
                 return temp;
             }
             else{
-                /// ì£¼ì˜!!???                             // cf) <=
+                /// ÁÖÀÇ!!???                             // cf) <=
                 if( index + offset >= 0 && index + offset < getPtrNum()-1 ) // offset only -1 !!
                 {
                     extendArray.getArray()[index+offset].key = extendArray.getConstArray()[index].key;
@@ -409,7 +409,7 @@ class PtrArray  /// ìƒì† ëŒ€ì‹ , has?
             }
         }
     public:
-        int getKeyIndexFromKey( const KEY& key )const{ /// ê°€ì¥ í°ê°’ì¸ ê²½ìš°, leftê°€ ë¦¬í„´.
+        int getKeyIndexFromKey( const KEY& key )const{ /// °¡Àå Å«°ªÀÎ °æ¿ì, left°¡ ¸®ÅÏ.
             return search( key );
         }
          int search( const KEY& key )const /** -1 : notFound */
@@ -495,7 +495,7 @@ class PtrArray  /// ìƒì† ëŒ€ì‹ , has?
         {
             const int num =  extendArray.getNum();
             // error check
-            ///assertNotEquals<int>( num, 1 ); // 0,2,3,4,... , numì´ 1ì¼ ìˆ˜ëŠ” ì—†ë‹¤. insertì—ì„œ í•˜ë‚˜ë” ë„£ëŠ”ë‹¤.
+            ///assertNotEquals<int>( num, 1 ); // 0,2,3,4,... , numÀÌ 1ÀÏ ¼ö´Â ¾ø´Ù. insert¿¡¼­ ÇÏ³ª´õ ³Ö´Â´Ù.
             // return value
             return num - 1;
         }
@@ -504,8 +504,8 @@ class PtrArray  /// ìƒì† ëŒ€ì‹ , has?
             return extendArray.getNum();
         }
     public:
-        /// indexë²ˆì§¸ì˜ keyì´í›„ë¶€í„° ë‚˜ëˆ„ë¯€ë¡œ DATAëŠ” index+1ë²ˆì§¸ë¶€í„° ë‚˜ëˆ„ì–´ì•¼í•œë‹¤.
-        PtrArray<KEY,DATA,COMP,EE>* divide( const int index ) /**  index+ 1ë¶€í„° divide.. ì—ëŸ¬ëŠ” return NULL?? */
+        /// index¹øÂ°ÀÇ keyÀÌÈÄºÎÅÍ ³ª´©¹Ç·Î DATA´Â index+1¹øÂ°ºÎÅÍ ³ª´©¾î¾ßÇÑ´Ù.
+        PtrArray<KEY,DATA,COMP,EE>* divide( const int index ) /**  index+ 1ºÎÅÍ divide.. ¿¡·¯´Â return NULL?? */
         {
             #ifdef SARRAYS_DEBUG
             checkUnderError( 1, index, 1 ); // must index >= 1
@@ -513,7 +513,7 @@ class PtrArray  /// ìƒì† ëŒ€ì‹ , has?
             #endif
             PtrArray<KEY,DATA,COMP,EE>* temp = new PtrArray<KEY,DATA,COMP,EE>( extendArray.getConstArray().size() );
             const int sIndex = index; const int eIndex = getPtrNum()-1;
-            // // getKeyByIndex, getDataByIndex   // eIndex-1, eIndex-2 ìˆœì„œê°€ ì¤‘ìš”í•¨!!
+            // // getKeyByIndex, getDataByIndex   // eIndex-1, eIndex-2 ¼ø¼­°¡ Áß¿äÇÔ!!
             temp->insert( extendArray.getConstArray()[eIndex].key, extendArray.getConstArray()[eIndex-1].data,
                          extendArray.getConstArray()[eIndex].data );
             for( int i = sIndex+1; i <= eIndex-2; i++ )
@@ -522,9 +522,9 @@ class PtrArray  /// ìƒì† ëŒ€ì‹ , has?
             }
 
             /// use remove..
-            for( int i = eIndex; i >= sIndex+1; i-- ) // ì§€ìš¸ë•ŒëŠ” ë’¤ì—ì„œë¶€í„° ì§€ìš°ëŠ” ê²Œ ë” ë‚«ë‹¤!
+            for( int i = eIndex; i >= sIndex+1; i-- ) // Áö¿ï¶§´Â µÚ¿¡¼­ºÎÅÍ Áö¿ì´Â °Ô ´õ ³´´Ù!
             {
-                extendArray.removeFromIndex( extendArray.getDataNum()-1 ); // ë’¤ì—ì„œ ë¶€í„° ì§€ìš´ë‹¤!
+                extendArray.removeFromIndex( extendArray.getDataNum()-1 ); // µÚ¿¡¼­ ºÎÅÍ Áö¿î´Ù!
             }
             //
             extendArray.getArray()[index].key = extendArray.getConstArray()[index-1].key;
