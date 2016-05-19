@@ -14,7 +14,7 @@ protected:
     void initial(){
         UNSIGNED_INTEGER temp=2;
         UNSIGNED_INTEGER num = sizeof(UNSIGNED_INTEGER)*8;
-        log2 = new UNSIGNED_INTEGER[num]; // 0 Ìè¨Ìï® 1
+        log2 = new UNSIGNED_INTEGER[num]; // 0 ∆˜«‘ 1
         log2[0] = 1; //
         for( UNSIGNED_INTEGER i=1;i< num;i++ ){
             log2[i] = temp;//

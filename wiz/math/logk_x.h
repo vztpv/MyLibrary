@@ -10,7 +10,7 @@ namespace wiz{
 template <typename UNSIGNED_INTEGER> /// chk...
 class Logk{
 private:
-    // ë³µì‚¬, ëŒ€ìž… ê¸ˆì§€..
+    // º¹»ç, ´ëÀÔ ±ÝÁö..
     Logk& operator=( const Logk& );
     Logk( const Logk& );
 private:
