@@ -2,5 +2,5 @@
 
 namespace wiz,
 
-C++11, MinGW Compiler, Win7 64bit
+C++11, Visual C++ Compiler, Win10 64bit
 
