@@ -7,7 +7,7 @@
 using namespace std;
 
 #include <stdio.h>
-
+/*
 namespace wiz{
 	template <class T>
 	inline T max(const T& t1, const T& t2)
@@ -28,7 +28,7 @@ namespace wiz{
 	}
 	///
 }
-
+*/
 namespace list{
 	/// #define wiz_list_DEBUG ???
 	template <class T>
@@ -730,14 +730,14 @@ public:
 		}
 	}
 private:
-	Fraction* cf; // coefficient °è¼ö..
-	Fraction b; // cf1*x1 + cf2*x2 + cf3*x3 = b //¿¡¼­ b
+	Fraction* cf; // coefficient ê³„ìˆ˜..
+	Fraction b; // cf1*x1 + cf2*x2 + cf3*x3 = b //ì—ì„œ b
 	int N; // num of cf element
 	//
 	friend class LinearEquationSystem;
 	friend class Sol_LinearEquationSystem;
 };
-// º¯¼ö N°³, ½Äµµ N°³ÀÎ °æ¿ì¸¸ ´Ù·é´Ù.
+// ë³€ìˆ˜ Nê°œ, ì‹ë„ Nê°œì¸ ê²½ìš°ë§Œ ë‹¤ë£¬ë‹¤.
 class LinearEquationSystem{
 public:
 	LinearEquationSystem& operator=(const LinearEquationSystem& les)
@@ -799,7 +799,7 @@ public:
 		return N;
 	}
 private:
-	LinearEquation** equations; //Equation ÁÙÀÓ¸» e
+	LinearEquation** equations; //Equation ì¤„ì„ë§ e
 	int N;
 	//
 	friend class Sol_LinearEquationSystem;
@@ -816,35 +816,35 @@ private:
 	Sol_LinearEquationSystem& operator=(const Sol_LinearEquationSystem&);
 private:
 	//
-	// ±¸Á¶Ã¼ , public Á¢±Ù °¡´É.
+	// êµ¬ì¡°ì²´ , public ì ‘ê·¼ ê°€ëŠ¥.
 	int N;
 	LeadingEntry leadingEntry;
 	LinearEquationSystem* temp_EquationSystem;
 	//
-	void Interchange(const int low1, const int low2){ // change Two Rows.µÎÁÙÀ» ¹Ù²Û´Ù. //
+	void Interchange(const int low1, const int low2){ // change Two Rows.ë‘ì¤„ì„ ë°”ê¾¼ë‹¤. //
 		if (low1 == low2){
-			return; //ÃÖÀûÈ­..
+			return; //ìµœì í™”..
 		}
 		LinearEquation temp(N);//
-		// coffeient¼³Á¤.
-		//1. temp ¿¡  low1ÀÇ µ¥ÀÌÅÍ¸¦ ÀúÀå.
+		// coffeientì„¤ì •.
+		//1. temp ì—  low1ì˜ ë°ì´í„°ë¥¼ ì €ì¥.
 		for (int i = 0; i< N; i++){
 			temp.cf[i] = temp_EquationSystem->equations[low1]->cf[i];
 		}
 		temp.b = temp_EquationSystem->equations[low1]->b;
 		//
-		//2. low1¿¡ low2ÀÇ µ¥ÀÌÅÍ¸¦ ÀúÀå.
+		//2. low1ì— low2ì˜ ë°ì´í„°ë¥¼ ì €ì¥.
 		for (int i = 0; i< N; i++){
 			temp_EquationSystem->equations[low1]->cf[i] = temp_EquationSystem->equations[low2]->cf[i];
 		}
 		temp_EquationSystem->equations[low1]->b = temp_EquationSystem->equations[low2]->b;
 		//
-		//3. low2¿¡ tempÀÇ µ¥ÀÌÅÍ¸¦ ÀúÀå
+		//3. low2ì— tempì˜ ë°ì´í„°ë¥¼ ì €ì¥
 		for (int i = 0; i< N; i++){
 			temp_EquationSystem->equations[low2]->cf[i] = temp.cf[i];
 		}
 		temp_EquationSystem->equations[low2]->b = temp.b;
-		//¿Ï·á..
+		//ì™„ë£Œ..
 	}
 	void Replacement(const int low1, const int low2, const Fraction& multiple_Fraction){ // low1 += ( low2 * multiple_Fraction )
 		//cout<< "multipleFraction" << multiple_Fraction << endl;
@@ -853,7 +853,7 @@ private:
 		}
 		temp_EquationSystem->equations[low1]->b += temp_EquationSystem->equations[low2]->b * multiple_Fraction;
 	}
-	void Scaling(const int low1, const Fraction& multiple_Fraction){ // multiple_Fraction is °öÇÒ ¼ö.
+	void Scaling(const int low1, const Fraction& multiple_Fraction){ // multiple_Fraction is ê³±í•  ìˆ˜.
 		for (int i = 0; i<N; i++){
 			if (temp_EquationSystem->equations[low1]->cf[i] != Fraction(false, 0, 1))
 				temp_EquationSystem->equations[low1]->cf[i] *= multiple_Fraction;
@@ -862,14 +862,14 @@ private:
 			temp_EquationSystem->equations[low1]->b *= multiple_Fraction;
 		//
 	}
-	const Fraction getabsolutelyFraction(const Fraction& db){ //cf inlineÇÔ¼ö. ÀüÃ¼ ¸ÅÅ©·Î.
+	const Fraction getabsolutelyFraction(const Fraction& db){ //cf inlineí•¨ìˆ˜. ì „ì²´ ë§¤í¬ë¡œ.
 		return ( db >= Fraction( false, 0, 1 ) ) ? db : -db;
 	}
-	const int GetRow_BigNum(const int nowRow){ // °¡Àå Å« ¼öÀÇ ÇàÀ» Ã£´Â´Ù.
-		//¶ÇÇÑ, LeadingEntry¸¦ ¹Ù²Û´Ù. ½Ç½Ã°£
-		int rowBigNum = nowRow; // °¡Àå Å«¼ö°¡ ÀÖ´Â Çà..
-		//°¡Àå Å«¼ö¸¦ Ã£´Â´Ù.
-		//¸ğµÎ 0ÀÎ °æ¿ì.
+	const int GetRow_BigNum(const int nowRow){ // ê°€ì¥ í° ìˆ˜ì˜ í–‰ì„ ì°¾ëŠ”ë‹¤.
+		//ë˜í•œ, LeadingEntryë¥¼ ë°”ê¾¼ë‹¤. ì‹¤ì‹œê°„
+		int rowBigNum = nowRow; // ê°€ì¥ í°ìˆ˜ê°€ ìˆëŠ” í–‰..
+		//ê°€ì¥ í°ìˆ˜ë¥¼ ì°¾ëŠ”ë‹¤.
+		//ëª¨ë‘ 0ì¸ ê²½ìš°.
 		bool check_ZeroColumn = false;
 		///
 		do{
@@ -880,27 +880,27 @@ private:
 				}
 			}
 			//
-			//0ÀÌ¶ó¸é, ¾Æ·¡ÂÊ(nowRowºÎÅÍ)À¸·Î ¸ğµÎ 0ÀÎ ÄÃ·³ÀÌ´Ù. // Áï, rowBigNum == nowRow..
+			//0ì´ë¼ë©´, ì•„ë˜ìª½(nowRowë¶€í„°)ìœ¼ë¡œ ëª¨ë‘ 0ì¸ ì»¬ëŸ¼ì´ë‹¤. // ì¦‰, rowBigNum == nowRow..
 			if (temp_EquationSystem->equations[rowBigNum]->cf[leadingEntry.column] == Fraction(false, 0, 1)){
-				if (leadingEntry.column < N-1 ){ //Ã¼Å©..
+				if (leadingEntry.column < N-1 ){ //ì²´í¬..
 					check_ZeroColumn = true;
-					leadingEntry.column += 1;//Ä®·³À» 1¸¸Å­ Áõ°¡ ½ÃÅ²´Ù.
+					leadingEntry.column += 1;//ì¹¼ëŸ¼ì„ 1ë§Œí¼ ì¦ê°€ ì‹œí‚¨ë‹¤.
 				}
 				else{ // leadingEntry.column >= VARIABLE_N-1 //
 					check_ZeroColumn = false;
-					return -1; // º¯¼ö°¡ ´ÙµÈ °æ¿ì
+					return -1; // ë³€ìˆ˜ê°€ ë‹¤ëœ ê²½ìš°
 				}
 			}
 			else{
 				check_ZeroColumn = false;
 			}
 		} while (check_ZeroColumn == true);
-		// ±× °ªÀ» ¸®ÅÏ ÇÑ´Ù.
+		// ê·¸ ê°’ì„ ë¦¬í„´ í•œë‹¤.
 		//
 		return rowBigNum;
 	}
 	//
-	void Debug(){ // Debug °â Çà·ÄÀ» ÇÁ¸°Æ® ÇÑ´Ù.
+	void Debug(){ // Debug ê²¸ í–‰ë ¬ì„ í”„ë¦°íŠ¸ í•œë‹¤.
 		for (int i = 0; i< N; i++){
 			//cout<< "Debug" << i << " ";
 			for (int k = 0; k< N; k++){
@@ -915,41 +915,41 @@ private:
 	const SolInfo PlayGetSolution(){
 		vector<LeadingEntry> vec;
 		///Debug();
-		//1 Reduced EcholonformÀ» ¸¸µç´Ù.
+		//1 Reduced Echolonformì„ ë§Œë“ ë‹¤.
 		//InterChange, Replacement, Scaling//
-		for (int i = leadingEntry.row; i < N && leadingEntry.column < N; i++){ // i´Â Çà..
-			//leading Entry°¡ Á¸Àç ÇÒ °æ¿ì´Â i 0,1,2, ... VARIABLE_N-1±îÁö..
-			//³¡³½´Ù.
+		for (int i = leadingEntry.row; i < N && leadingEntry.column < N; i++){ // iëŠ” í–‰..
+			//leading Entryê°€ ì¡´ì¬ í•  ê²½ìš°ëŠ” i 0,1,2, ... VARIABLE_N-1ê¹Œì§€..
+			//ëë‚¸ë‹¤.
           ///  Debug();
-			//¸ÕÀú leading Entry°¡ °¡Àå Å« ÇàÀ» Ã£´Â´Ù.
+			//ë¨¼ì € leading Entryê°€ ê°€ì¥ í° í–‰ì„ ì°¾ëŠ”ë‹¤.
 			const int row_BigLeadingEntry = GetRow_BigNum(i);
 
-			if (row_BigLeadingEntry == -1){ // ¸¸¾à, Àı´ë°ªÀÌ °¡Àå Å« ÇàÀ» Ã£¾Ò´Âµ¥, 0 ÀÌ¶ó¸é, ¸ğµÎ 0ÀÎ »óÅÂ.
+			if (row_BigLeadingEntry == -1){ // ë§Œì•½, ì ˆëŒ€ê°’ì´ ê°€ì¥ í° í–‰ì„ ì°¾ì•˜ëŠ”ë°, 0 ì´ë¼ë©´, ëª¨ë‘ 0ì¸ ìƒíƒœ.
 				//cout<< "ERR" << endl;
 				break;
 			}
-			//±×¸®°í leading Entry°¡ °¡Àå Å«Çà°ú i¹øÂ° ÇàÀ» ¹Ù²Û´Ù.
+			//ê·¸ë¦¬ê³  leading Entryê°€ ê°€ì¥ í°í–‰ê³¼ ië²ˆì§¸ í–‰ì„ ë°”ê¾¼ë‹¤.
 			Interchange(i, row_BigLeadingEntry);
 			/// chk..
 			vec.push_back(leadingEntry);
 
-			//iÇà¿¡ LeadingEntry°¡ ÀÖ´Ù. //¿­Àº ´Ù¸¦ ¼ö ÀÖ´Ù.
-			//³ª¸ÓÁö ÇàÀ» Replacement¸¦ ÇÑ´Ù.
+			//ií–‰ì— LeadingEntryê°€ ìˆë‹¤. //ì—´ì€ ë‹¤ë¥¼ ìˆ˜ ìˆë‹¤.
+			//ë‚˜ë¨¸ì§€ í–‰ì„ Replacementë¥¼ í•œë‹¤.
 			for (int j = i + 1; j< N; j++){
-				// j¿¡ iÀÇ ¹è ÇÑ°ÍÀ» °öÇÑ´Ù.
+				// jì— iì˜ ë°° í•œê²ƒì„ ê³±í•œë‹¤.
 				//Debug();
 				//cout<< "j,i" << j+1 << " " << i+1 << endl;
 				//cout<< "leadingEntry.column" << leadingEntry.column+1 << endl;
-				//Å©±âº¯È­.
+				//í¬ê¸°ë³€í™”.
 				if (temp_EquationSystem->equations[j]->cf[leadingEntry.column] != Fraction(false, 0, 1)){
 					Scaling(j, -temp_EquationSystem->equations[i]->cf[leadingEntry.column]
 							/ temp_EquationSystem->equations[j]->cf[leadingEntry.column]);
 
 					Replacement(j, i, Fraction(false, 1, 1));
-				}// 0ÀÌ¸é ¾ÈÇØµµ µÈ´Ù.
-				// += -( leading Entry°¡ ÀÖ´Â ¿­ÀÇ ¼ıÀÚ ) * ( leading entryÀÇ ¼ıÀÚ / leading Entry°¡ ÀÕ´Â ¿­ÀÇ ¼ıÀÚ)
+				}// 0ì´ë©´ ì•ˆí•´ë„ ëœë‹¤.
+				// += -( leading Entryê°€ ìˆëŠ” ì—´ì˜ ìˆ«ì ) * ( leading entryì˜ ìˆ«ì / leading Entryê°€ ì‡ëŠ” ì—´ì˜ ìˆ«ì)
 			}//
-			//´ÙÀ½ ¿£Æ®¸®ÀÇ Çà°ú ¿­..
+			//ë‹¤ìŒ ì—”íŠ¸ë¦¬ì˜ í–‰ê³¼ ì—´..
 			leadingEntry.row += 1; // cf.. int& i =leadingEntry.row;
 			leadingEntry.column += 1;
 		}
@@ -961,22 +961,22 @@ private:
                 Interchange(vec[i].row, vec[i].column);
 			}
 		}
-		////2. ÇØ¸¦ ±¸ÇÑ´Ù.
+		////2. í•´ë¥¼ êµ¬í•œë‹¤.
 		for (int i = 0; i< N; i++){
 			if (temp_EquationSystem->equations[i]->cf[i] != Fraction(false, 0, 1))
-				Scaling(i, Fraction(false, 1, 1) / temp_EquationSystem->equations[i]->cf[i]);//ÀÚ±â ÀÚ½ÅÀ¸·Î ³ª´«´Ù.
+				Scaling(i, Fraction(false, 1, 1) / temp_EquationSystem->equations[i]->cf[i]);//ìê¸° ìì‹ ìœ¼ë¡œ ë‚˜ëˆˆë‹¤.
 		}
 		///
 		for (int i = N - 2; i >= 0; i--){
 			//Debug();
 			for (int j = 1; j < N - i; j++){
-				//ÀÚ±â ÀÚ½Å°ú ±×¾Æ·¡¿¡ ÀÖ´Â °Í. // »«´Ù.
+				//ìê¸° ìì‹ ê³¼ ê·¸ì•„ë˜ì— ìˆëŠ” ê²ƒ. // ëº€ë‹¤.
 				if( temp_EquationSystem->equations[i+j]->cf[i+j] != Fraction(false, 0, 1) )
                     Replacement(i, i + j, -(temp_EquationSystem->equations[i]->cf[i + j])); ////
 			}
 		}
 
-		///   a. 0,0, ... , B , but, B != 0ÀÎ °æ¿ì°¡ ÀÖ´Ù¸é return -1 INCONSIST_SOLUTION
+		///   a. 0,0, ... , B , but, B != 0ì¸ ê²½ìš°ê°€ ìˆë‹¤ë©´ return -1 INCONSIST_SOLUTION
 		for (int i = 0; i < N; i++){
 			if (temp_EquationSystem->equations[i]->cf[i] == Fraction(false, 0, 1) &&
 				temp_EquationSystem->equations[i]->b != Fraction(false, 0, 1)){
@@ -986,8 +986,8 @@ private:
 			}
 		}
 		SolInfo si;
-		///   b. free VariableÀÌ ÀÖ´Â°¡?
-		//        reading Entry°¡ ¾ø´Â ¿­ÀÌ ÀÖµû¸é return 1; INFINITY_SOLUTION
+		///   b. free Variableì´ ìˆëŠ”ê°€?
+		//        reading Entryê°€ ì—†ëŠ” ì—´ì´ ìˆë”°ë©´ return 1; INFINITY_SOLUTION
 		for (int i = 0; i< N; i++){ //
             if( temp_EquationSystem->equations[i]->cf[i] == Fraction(false, 0, 1)
                 && Fraction(false, 0, 1) == temp_EquationSystem->equations[i]->b ){
@@ -1007,10 +1007,10 @@ private:
             }
 		}
 
-		///   c. free Valuable ÀÌ ¾ø´Ù¸é.
-		//        ¸ğµç ÇàÀÇ Ã³À½ ¼ıÀÚ¸¦ 1·Î ¸ÂÃá´Ù. // ÇàÀÌ ¿­º¸´Ù ±ä°ß¿ì, ³ª¸ÓÁö ¹ØÀÇ ÇàÀº ¸ğµÎ 0 ÀÎ »óÅÂÀÌ´Ù.
+		///   c. free Valuable ì´ ì—†ë‹¤ë©´.
+		//        ëª¨ë“  í–‰ì˜ ì²˜ìŒ ìˆ«ìë¥¼ 1ë¡œ ë§ì¶˜ë‹¤. // í–‰ì´ ì—´ë³´ë‹¤ ê¸´ê²¬ìš°, ë‚˜ë¨¸ì§€ ë°‘ì˜ í–‰ì€ ëª¨ë‘ 0 ì¸ ìƒíƒœì´ë‹¤.
 		if( si.vec.empty() ) { si.id = UNIQUE_SOLUTION; }
-		return si; // -1, 0, 1¸®ÅÏ.
+		return si; // -1, 0, 1ë¦¬í„´.
 	}
 	//
 public:
@@ -1023,13 +1023,13 @@ public:
 			temp_EquationSystem = NULL;
 		}
 	}
-	// constructor, ¼Ò¸êÀÚ.
+	// constructor, ì†Œë©¸ì.
 	// print .. main function.
 	LinearEquationSystem GetSolution(const LinearEquationSystem& equationSystem, SolInfo* op = NULL){
-		// Leading Entry ÃÊ±âÈ­.
+		// Leading Entry ì´ˆê¸°í™”.
 		leadingEntry.row = 0; leadingEntry.column = 0;
 		this->N = equationSystem.N;
-		// ¸ÕÀú  temp¸¦ ÃÊ±âÈ­ ÇÑ´Ù.
+		// ë¨¼ì €  tempë¥¼ ì´ˆê¸°í™” í•œë‹¤.
 		if (temp_EquationSystem != NULL){
 			delete temp_EquationSystem; temp_EquationSystem = NULL;
 		}
