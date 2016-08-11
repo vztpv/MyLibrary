@@ -6,7 +6,10 @@
 #include <vector>
 #include <fstream>
 #include <thread>
+#include <algorithm>
 using namespace std;
+
+//#include <wiz/load_data_types.h> /// 
 
 namespace wiz {
 	namespace load_data {
@@ -14,6 +17,111 @@ namespace wiz {
 		class Utility
 		{
 		public:
+			static bool IsInteger(const string& str) {
+				int state = 0;
+				for (int i = 0; i < str.size(); ++i) {
+					switch (state)
+					{
+					case 0:
+						if ('+' == str[i] || '-' == str[i]) {
+							state = 0;
+						}
+						else if (str[i] >= '0' && str[i] <= '9')
+						{
+							state = 1;
+						}
+						else return false;
+						break;
+					case 1:
+						if (str[i] >= '0' && str[i] <= '9') {
+							state = 1;
+						}
+						else return false;
+					}
+				}
+				return 1 == state; /// chk..
+			}
+			static bool IsDouble(const string& str) {
+				int state = 0;
+				for (int i = 0; i < str.size(); ++i) {
+					switch (state)
+					{
+					case 0:
+						if ('+' == str[i] || '-' == str[i]) {
+							state = 0;
+						}
+						else if (str[i] >= '0' && str[i] <= '9')
+						{
+							state = 1;
+						}
+						else return false;
+						break;
+					case 1:
+						if (str[i] >= '0' && str[i] <= '9') {
+							state = 1;
+						}
+						else if (str[i] == '.') {
+							state = 2;
+						}
+						else return false;
+						break;
+					case 2:
+						if (str[i] >= '0' && str[i] <= '9') { state = 3; }
+						else return false;
+						break;
+					case 3:
+						if (str[i] >= '0' && str[i] <= '9') { state = 3; }
+						else return false;
+						break;
+					}
+				}
+				return 3 == state;
+			}
+			static bool IsDate(const string& str)
+			{
+				int state = 0;
+				for (int i = 0; i < str.size(); ++i) {
+					switch (state)
+					{
+					case 0:
+						if (str[i] >= '0' && str[i] <= '9')
+						{
+							state = 1;
+						}
+						else return false;
+						break;
+					case 1:
+						if (str[i] >= '0' && str[i] <= '9') {
+							state = 1;
+						}
+						else if (str[i] == '.') {
+							state = 2;
+						}
+						else return false;
+						break;
+					case 2:
+						if (str[i] >= '0' && str[i] <= '9') { state = 2; }
+						else if (str[i] == '.') {
+							state = 3;
+						}
+						else return false;
+						break;
+					case 3:
+						if (str[i] >= '0' && str[i] <= '9') { state = 4; }
+						else return false;
+						break;
+					case 4:
+						if (str[i] >= '0' && str[i] <= '9') { state = 4; }
+						else return false;
+						break;
+					}
+				}
+				return 4 == state;
+			}
+			static bool IsMinus(const string& str)
+			{
+				return str.empty() == false && str[0] == '-';
+			}
 			/// todo bool ,more stable!!
 			static void AddSpace(const string& file1Name, const string& file2Name) {
 				ifstream inFile;
@@ -133,6 +241,30 @@ namespace wiz {
 					}
 				}
 			};
+		private:
+			static string RemoveEndSpace( const string& str )
+			{
+				string temp;
+				int state = 0;
+
+				for (int i = str.size() - 1; i >= 0; --i) {
+					if (state == 0 && wiz::isWhitespace(str[i]))
+					{
+						continue;
+					}
+					else {
+						state = 1;
+					}
+
+					temp.push_back(str[i]);
+				}
+				// reverse..
+				string retVal;
+				for (int i = temp.size() - 1; i >= 0; --i) {
+					retVal.push_back(temp[i]);
+				}
+				return retVal;
+			}
 		public:
 			static pair<bool, int> Reserve2(ifstream& inFile, ArrayQueue<string>& aq, const int num = 1)
 			{
@@ -142,6 +274,7 @@ namespace wiz {
 				ArrayQueue<string> arrayQueue[4];
 				
 				for (int i = 0; i < num && (getline(inFile,temp)); ++i) {
+					//temp = RemoveEndSpace(temp);
 					temp = PassSharp(temp);
 					temp = AddSpace(temp);
 					temp = ChangeSpace(temp, '^'); 
@@ -274,86 +407,6 @@ namespace wiz {
 				return{ false, -1 };
 			}
 
-			static bool ChkData(const UserType* utTemp)
-			{
-				bool chk = true;
-				const int itemListSize = utTemp->GetItemListSize();
-				for (int i = 0; i < itemListSize; ++i) {
-					if (utTemp->GetItemList(i).GetName() != ""
-						&& utTemp->GetItemList(i).GetCount() > 1) {
-						cout << utTemp->GetItemList(i).GetName() << endl;
-						return false;
-					}
-				}
-				const int UserTypeSize = utTemp->GetUserTypeListSize();
-				for (int i = 0; i < UserTypeSize; ++i) {
-					for (int j = 0; j < utTemp->GetUserTypeList(i).GetCount(); ++j) {
-						chk = chk && ChkData(utTemp->GetUserTypeList(i).Get(j));
-					}
-				}
-
-				return chk;
-			}
-			/// find userType! not itemList!
-			static std::pair<bool, vector< UserType*> > Find(UserType* global, const string& position) /// option, option_offset
-			{
-				vector< UserType* > temp;
-				if (position.empty()) { temp.push_back(global); return{ true, temp }; }
-
-				StringTokenizer tokenizer(position, "/");
-				vector<string> strVec;
-				Deck<pair< UserType*, int>> utDeck;
-				pair<UserType*, int> utTemp;
-				utTemp.first = global;
-				utTemp.second = 0;
-				TypeArray<UserType*> utTemp2;
-
-				for (int i = 0; i < tokenizer.countTokens(); ++i) {
-					string strTemp = tokenizer.nextToken();
-					if (strTemp == "root" && i == 0) {
-					}
-					else {
-						strVec.push_back(strTemp);
-					}
-					
-					if ((strVec.size() >= 1) && (" " == strVec[strVec.size() - 1])) /// chk!!
-					{
-						strVec[strVec.size() - 1] = "";
-					}
-				}
-				utDeck.push_front(utTemp);
-
-				bool exist = false;
-				while (false == utDeck.empty()) {
-					utTemp = utDeck.pop_front();
-
-					//	if (false == exist && utDeck.empty() && utTemp.second < strVec.size()  && false == utTemp.first->GetUserTypeItemRef(strVec[utTemp.second], utTemp2))
-					//	{
-					//		return{ false, vector<UserType*>() };
-					//	}
-					if (utTemp.second < strVec.size() && strVec[utTemp.second] == "$")
-					{
-						for (int j = utTemp.first->GetUserTypeListSize() - 1; j >= 0; --j) {
-							for (int k = utTemp.first->GetUserTypeList(j).GetCount() - 1; k >= 0; --k) {
-								UserType* x = utTemp.first->GetUserTypeList(j).Get(k);
-								utDeck.push_front(make_pair(x, utTemp.second + 1));
-							}
-						}
-					}
-					else if (utTemp.second < strVec.size() && utTemp.first->GetUserTypeItemRef(strVec[utTemp.second], utTemp2)) {
-						for (int j = utTemp2.GetCount() - 1; j >= 0; --j) {
-							utDeck.push_front(make_pair(utTemp2.Get(j), utTemp.second + 1));
-						}
-					}
-
-					if (utTemp.second == strVec.size()) {
-						exist = true;
-						temp.push_back(utTemp.first);
-					}
-				}
-				if (false == exist) { return{ false, vector<UserType*>() }; }
-				return{ true, temp };
-			}
 		public:
 
 			// To Do
@@ -437,23 +490,6 @@ namespace wiz {
 					if (str[i] == target_ch)
 					{
 						str[i] = result_ch;
-					}
-				}
-			}
-
-			static void ReplaceAll(UserType* temp, const char target_ch, const char result_ch) {
-				const int itemListSize = temp->GetItemListSize();
-				const int userTypeListSize = temp->GetUserTypeListSize();
-
-				for (int i = 0; i < itemListSize; ++i) {
-					TypeArray<std::string>& itemList = temp->GetItemList(i);
-					for (int j = 0; j < itemList.GetCount(); ++j) {
-						ChangeCharInString(itemList.Get(j), target_ch, result_ch);
-					}
-				}
-				for (int i = 0; i < userTypeListSize; ++i) {
-					for (int j = 0; j < temp->GetUserTypeList(i).GetCount(); ++j) {
-						ReplaceAll(temp->GetUserTypeList(i).Get(j), target_ch, result_ch);
 					}
 				}
 			}

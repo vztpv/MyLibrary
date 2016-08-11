@@ -42,6 +42,7 @@ namespace wiz{
     }
 	*/
     ///
+
     template <class T>
     class STD_SWAP
     {
@@ -401,5 +402,19 @@ namespace wiz{
 		}
 		return -1;
 	}
+	class wizObject
+	{
+	private:
+	public:
+		wizObject() { }
+		wizObject(const wizObject& object) { }
+
+		virtual ~wizObject() { }
+
+		virtual std::string toString()const = 0;
+		//virtual void initial( const wizObject& object )=0;
+		virtual wizObject& operator=(const wizObject& object) { return *this; }
+		virtual wizObject* clone()const = 0;
+	};
 }
 #endif

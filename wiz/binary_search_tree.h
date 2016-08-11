@@ -3,38 +3,103 @@
 
 #include <wiz/global.h>
 #include <wiz/newArrays.h>
-#include <vector>
-#include <wiz/stacks.h>
+
 
 namespace wiz
 {
-	namespace bst{
+	namespace bst {
+		template <class T>
+		T max(const T& t1, const T& t2)
+		{
+			if (t1 > t2) { return t1; }
+			return t2;
+		}
 		template <class T>
 		class BinaryNode
 		{
 		public:
 			T val;
+
 			BinaryNode<T>* left;
 			BinaryNode<T>* right;
 			BinaryNode<T>* parent;
 			//
 			explicit BinaryNode(const T& val = T()) : val(val), left(NULL), right(NULL), parent(NULL) { }
 		};
+		
 
-		template < class T, class COMP=ASC<T>, class EE=EE<T> >
+		template < class T, class COMP = ASC<T>, class EE = EE<T> >
 		class BinarySearchTree
 		{
 		private:
 			BinaryNode<T>* root;
 			int count;
+		public:
+			void InorderTraversalUsingStack(wiz::Array<T>& arr)
+			{
+				InorderTraversalUsingStack(root, arr);
+			}
+			void PreorderTraversalUsingStack(wiz::Array<T>& arr)
+			{
+				PreorderTraversalUsingStack(root, arr);
+			}
 		private:
+			static void InorderTraversalUsingStack(BinaryNode<T>* root, wiz::Array<T>& arr)
+			{
+				if (NULL == root) { return; }
+				int index = 0;
+				std::vector<BinaryNode<T>*> nodeStack;
+				bool use_left_loop = true;
+				nodeStack.push_back(root);
+
+				while (false == nodeStack.empty()) {
+					while (use_left_loop && NULL != nodeStack.back()->left) {
+						nodeStack.push_back(nodeStack.back()->left);
+					}
+
+					BinaryNode<T>* temp = nodeStack.back();
+					arr[index] = temp->val;
+					index++;
+					
+					nodeStack.pop_back();
+					if (NULL != temp->right) {
+						nodeStack.push_back(temp->right);
+						use_left_loop = true;
+					}
+					else {
+						use_left_loop = false;
+					}
+				}
+			}
+			
+			static void PreorderTraversalUsingStack(BinaryNode<T>* root, wiz::Array<T>& arr)
+			{
+				if (NULL == root) { return; }
+				int index = 0;
+				std::vector<BinaryNode<T>*> nodeStack;
+				nodeStack.push_back(root);
+
+				while (false == nodeStack.empty()) {
+					BinaryNode<T>* left = nodeStack.back()->left;
+					BinaryNode<T>* right = nodeStack.back()->right;
+					BinaryNode<T>* now = nodeStack.back();
+
+					nodeStack.pop_back();
+					if (NULL != right) { nodeStack.push_back(right); }
+					if (NULL != left) { nodeStack.push_back(left); }
+					
+					arr[index] = now->val;
+					index++;
+				}
+			}
+
 			static int GetLevel(const BinaryNode<T>* node) /// chk...
 			{
 				if (NULL == node) {
 					return 0;
 				}
 
-				int val = 1 + wiz::max(GetLevel(node->left), GetLevel(node->right));
+				int val = 1 + wiz::bst::max(GetLevel(node->left), GetLevel(node->right));
 				return val;
 			}
 			static void PrintLevelDif(const BinaryNode<T>* node) /// chk..
@@ -61,8 +126,8 @@ namespace wiz
 				}
 				//
 				bool bval = // node1->val == node2->val;
-                        EE() ( node1->val, node2->val );
-                return bval && Equal(node1->left, node2->left)
+					EE() (node1->val, node2->val);
+				return bval && Equal(node1->left, node2->left)
 					&& Equal(node1->right, node2->right);
 			}
 
@@ -80,7 +145,7 @@ namespace wiz
 			{
 				return new BinaryNode<T>(val);
 			}
-			static void InorderTraversal(Array<T>& arr, BinaryNode<T>* node, int& idx)
+			static void InorderTraversal(wiz::Array<T>& arr, BinaryNode<T>* node, int& idx)
 			{
 				if (NULL == node) {
 					return;
@@ -90,7 +155,7 @@ namespace wiz
 				idx++;
 				InorderTraversal(arr, node->right, idx);
 			}
-			static void InverseInorderTraversal(Array<T>& arr, BinaryNode<T>* node, int& idx) /// rename?
+			static void InverseInorderTraversal(wiz::Array<T>& arr, BinaryNode<T>* node, int& idx) /// rename?
 			{
 				if (NULL == node) {
 					return;
@@ -100,7 +165,7 @@ namespace wiz
 				idx++;
 				InverseInorderTraversal(arr, node->left, idx);
 			}
-			static void PreorderTraversal(Array<T>& arr, BinaryNode<T>* node, int& idx)
+			static void PreorderTraversal(wiz::Array<T>& arr, BinaryNode<T>* node, int& idx)
 			{
 				if (NULL == node) {
 					return;
@@ -130,11 +195,11 @@ namespace wiz
 
 				while (temp) {
 					//if (temp->val == val) {
-					if( EE() ( temp->val, val ) ) {
+					if (EE() (temp->val, val)) {
 						return temp;
 					}
 					//else if ( temp->val > val) {
-					else if( COMP() ( val, temp->val ) ) {
+					else if (COMP() (val, temp->val)) {
 						temp = temp->left;
 					}
 					else {
@@ -181,7 +246,7 @@ namespace wiz
 				return nvNode;
 			}
 
-			static BinaryNode<T>* Balancing(const Array<T>& sortedArr, int start, int end)
+			static BinaryNode<T>* Balancing(const wiz::Array<T>& sortedArr, int start, int end)
 			{
 				if (start > end) {
 					return NULL;
@@ -197,16 +262,16 @@ namespace wiz
 				return temp;
 			}
 
-    public:
-			static void PrintLevelDif(const BinarySearchTree<T,COMP,EE>& bst)
+		public:
+			static void PrintLevelDif(const BinarySearchTree<T, COMP, EE>& bst)
 			{
 				PrintLevelDif(bst.root);
 			}
-			static bool Equal(const BinarySearchTree<T,COMP,EE>& bst1, const BinarySearchTree<T,COMP,EE>& bst2)
+			static bool Equal(const BinarySearchTree<T, COMP, EE>& bst1, const BinarySearchTree<T, COMP, EE>& bst2)
 			{
 				return Equal(bst1.root, bst2.root);
 			}
-			static void Balancing(BinarySearchTree<T,COMP,EE>& bt, const Array<T>& sortedArr)
+			static void Balancing(BinarySearchTree<T, COMP, EE>& bt, const wiz::Array<T>& sortedArr)
 			{
 				if (0 < bt.GetCount()) {
 					bt.RemoveAll();
@@ -219,12 +284,12 @@ namespace wiz
 				RemoveAll();
 			}
 
-			BinarySearchTree(const BinarySearchTree<T,COMP,EE>& bst)
+			BinarySearchTree(const BinarySearchTree<T, COMP, EE>& bst)
 			{
-			    root = NULL; count = 0;
+				root = NULL; count = 0;
 				*this = bst;
 			}
-			BinarySearchTree<T,COMP,EE>& operator=(const BinarySearchTree<T,COMP,EE>& bst)
+			BinarySearchTree<T, COMP, EE>& operator=(const BinarySearchTree<T, COMP, EE>& bst)
 			{
 				if (root != bst.root)
 				{
@@ -251,13 +316,13 @@ namespace wiz
 					BinaryNode<T>* temp2 = temp;
 					while (temp != NULL) {
 						//if (temp->val < val)
-						if( COMP() ( temp->val, val ) )
+						if (COMP() (temp->val, val))
 						{
 							temp2 = temp;
 							temp = temp->right;
 						}
 						//else if (temp->val > val)
-						else if( COMP() ( val, temp->val ) )
+						else if (COMP() (val, temp->val))
 						{
 							temp2 = temp;
 							temp = temp->left;
@@ -265,11 +330,11 @@ namespace wiz
 					}
 					// create, set parent.
 					//if (temp2->val < val) {
-					if( COMP() ( temp2->val, val ) ) {
+					if (COMP() (temp2->val, val)) {
 						temp2->right = CreateBinaryNode(val); temp2->right->parent = temp2;
 					}
 					//else if (temp2->val > val) {
-					else if( COMP() ( val, temp2->val ) ) {
+					else if (COMP() (val, temp2->val)) {
 						temp2->left = CreateBinaryNode(val); temp2->left->parent = temp2;
 					}
 				}
@@ -278,7 +343,7 @@ namespace wiz
 			}
 			bool IsExist(const T& val)const
 			{
-				return NULL != Search( root, val );
+				return NULL != Search(root, val);
 			}
 			void Remove(const T& val) /// chk!!
 			{
@@ -334,7 +399,7 @@ namespace wiz
 						bvNode->parent->right = NULL;
 
 						bvNode->right = valNode->right;
-						if (valNode->right){
+						if (valNode->right) {
 							valNode->right->parent = bvNode;
 						}
 
@@ -388,7 +453,7 @@ namespace wiz
 						nvNode->parent->left = NULL;
 
 						nvNode->left = valNode->left;
-						if (valNode->left){
+						if (valNode->left) {
 							valNode->left->parent = nvNode;
 						}
 
@@ -425,37 +490,37 @@ namespace wiz
 				root = NULL;
 				count = 0;
 			}
-			Array<T> ToSortedArray() const // To Array Using Inorder
+ 			wiz::Array<T> ToSortedArray() const // To wiz::Array Using Inorder
 			{
 				if (count <= 0) {
-					return Array<T>();
+					return wiz::Array<T>();
 				}
 				// inorder Traversal
-				Array<T> arr(count);
+				wiz::Array<T> arr(count);
 				int i = 0;
 				InorderTraversal(arr, root, i);
 				return arr;
 			}
-			Array<T> ToInverseSortedArray() const
+			wiz::Array<T> ToInverseSortedArray() const
 			{
 				if (count <= 0) {
-					return Array<T>();
+					return wiz::Array<T>();
 				}
-				Array<T> arr(count);
+				wiz::Array<T> arr(count);
 				int i = 0;
 				InverseInorderTraversal(arr, root, i);
 				return arr;
 			}
-			Array<T> ToArrayUsingInorder() const
+			wiz::Array<T> ToUsingInorder() const
 			{
-				return ToSortedArray();
+				return ToSortedwiz::Array();
 			}
-			Array<T> ToArrayUsingPreorder() const
+			wiz::Array<T> ToUsingPreorder() const
 			{
 				if (count <= 0) {
-					return Array<T>();
+					return wiz::Array<T>();
 				}
-				Array<T> arr(count);
+				wiz::Array<T> arr(count);
 				int i = 0;
 				PreorderTraversal(arr, root, i);
 				return arr;

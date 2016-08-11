@@ -4,14 +4,14 @@
 
 
 namespace wiz{
-	template <class T, class COMP = ASC<T>, class EE = EE<T> >
+	template <class T, template< class A > class ARR,  class COMP = ASC<T>, class EE = EE<T> > /// ARR -> ??
 	class BinarySearch {
 	public:
-		static bool search(const wizArray<T>& arr, const T& key, int* index=NULL)
+		static bool search(const ARR<T>& arr, const T& key, int* index=NULL)
 		{
 			return search(arr, key, 0, arr.size() - 1, index);
 		}
-		static bool search(const wizArray<T>& arr, const T& key, const int low, const int high, int* index)
+		static bool search(const ARR<T>& arr, const T& key, const int low, const int high, int* index)
 		{
 			COMP comp;
 			EE ee;

@@ -1,14 +1,16 @@
 #ifndef WIZVAR_H_INCLUDED
 #define WIZVAR_H_INCLUDED
 
+
 #include <wiz/global.h>
-using namespace std;
+#include <wiz/wizardError.h>
+#include <sstream>
+#include <string>
 
 namespace wiz {
-    // SmartPointer, Var, wizardError0 => global.h??
     enum VarType { TINT, TDOUBLE, TSTRING, TBOOL, TOBJECT, TNOTDEFINE }; // "T is Type
 
-    class wizVarError{ }; // : Error #include "wizardError.h"
+    class wizVarError : public wiz::Error { }; // : Error #include "wizardError.h"
     class Var
     {
     private:
@@ -18,14 +20,14 @@ namespace wiz {
         // P : Pointer and inline!!
         int* convertIntP( void* x )const { return static_cast<int*>( x ); }
         double* convertDoubleP( void* x )const { return static_cast<double*>( x ); }
-        string* convertStringP( void* x )const { return static_cast<string*>( x ); }
-        wizObject* convertObjectP( void* x )const { return static_cast<wizObject*>( x ); }
+        std::string* convertStringP( void* x )const { return static_cast<std::string*>( x ); }
+        wiz::wizObject* convertObjectP( void* x )const { return static_cast<wiz::wizObject*>( x ); }
         bool* convertBoolP( void* x )const { return static_cast<bool*>( x ); }
         void* convertVoidP( int* x )const { return static_cast<void*>( x ); }
         void* convertVoidP( double* x )const { return static_cast<void*>( x ); }
-        void* convertVoidP( string* x )const { return static_cast<void*>( x ); }
+        void* convertVoidP( std::string* x )const { return static_cast<void*>( x ); }
         void* convertVoidP( bool* x )const { return static_cast<void*>( x ); }
-        void* convertVoidP( wizObject* x )const { return static_cast<void*>( x ); } // wizObject <- SmartPtr<wizobject>
+        void* convertVoidP( wiz::wizObject* x )const { return static_cast<void*>( x ); } // wizObject <- SmartPtr<wizobject>
     public:
         Var()
         : var(NULL), type(TNOTDEFINE)
@@ -41,17 +43,42 @@ namespace wiz {
             case TDOUBLE:
                 var = convertVoidP( new double( *convertDoubleP( _var.var ) ) ); break;
             case TSTRING:
-                var = convertVoidP( new string( *convertStringP( _var.var ) ) ); break;
+                var = convertVoidP( new std::string( *convertStringP( _var.var ) ) ); break;
             case TBOOL:
                 var = convertVoidP( new bool( *convertBoolP( _var.var ) ) ); break;
             case TOBJECT:
-                var = convertVoidP( convertObjectP( _var.var )->clone() ); break;
+                var = convertVoidP( convertObjectP( _var.var )->clone() ); break; /// chk!
             default:
                 throw wizVarError();
             }
         }
         Var& operator=( const Var& _var )
         {
+			if (this == &_var) { return *this; } /// chk!!
+
+			if (TNOTDEFINE == type && TNOTDEFINE == _var.type )
+			{
+				return *this;
+			}
+			else if (TNOTDEFINE == type)
+			{
+				this->type = _var.type;
+				switch (_var.type)
+				{
+				case TINT:
+					var = convertVoidP(new int(*convertIntP(_var.var))); break;
+				case TDOUBLE:
+					var = convertVoidP(new double(*convertDoubleP(_var.var))); break;
+				case TSTRING:
+					var = convertVoidP(new std::string(*convertStringP(_var.var))); break;
+				case TBOOL:
+					var = convertVoidP(new bool(*convertBoolP(_var.var))); break;
+				case TOBJECT:
+					var = convertVoidP(convertObjectP(_var.var)->clone()); break; /// chk!
+				}
+
+			}
+
             if( type != _var.type )
             {
                 throw wizVarError(); // error check..
@@ -78,19 +105,19 @@ namespace wiz {
     public:
         Var( int x );
         Var( double x );
-        Var( string str );
+        Var( std::string& str );
         Var( const char* str );
         Var( bool x );
         Var( wizObject& object );
 
         virtual ~Var();
 
-        // get, set  typeÏù¥ ÎßûÏßÄ ÏïäÏúºÎ©¥ ÏóêÎü¨!!
-        // void*Ïù∏ Í≤ΩÏö∞, try~catchÎ•º ÏÇ¨Ïö©ÌïúÎã§!!
+        // get, set  type¿Ã ∏¬¡ˆ æ ¿∏∏È ø°∑Ø!!
+        // void*¿Œ ∞ÊøÏ, try~catch∏¶ ªÁøÎ«—¥Ÿ!!
         bool get( void* data )const;
         bool get( int& x )const;
         bool get( double& x )const;
-        bool get( string& x )const;
+        bool get( std::string& x )const;
         bool get( bool& x )const;
         bool get( wizObject& x )const;
 
@@ -98,8 +125,8 @@ namespace wiz {
         bool set( void* data );
         bool set( int x );
         bool set( double x );
-        bool set( const char* x ) { return set( string( x ) ); }
-        bool set( string x );
+        bool set( const char* x ) { return set( std::string( x ) ); }
+        bool set( std::string x );
         bool set( bool x );
         bool set( wizObject& object );
 
@@ -107,8 +134,19 @@ namespace wiz {
         enum VarType getVarType()const { return type; }
 
         // toString
-        string toString()const;
+        std::string toString()const;
+
+		// operator type
+		explicit operator wizObject*() {
+			if (TOBJECT == type) {
+				return static_cast<wizObject*>(var);
+			}
+			return NULL; // nullptr
+		}	
+		/// todo ?
     };
+
+
 
     Var::Var( int x )
     {
@@ -124,13 +162,13 @@ namespace wiz {
     }
     Var::Var( const char* str )
     {
-       var = convertVoidP( new string );
+       var = convertVoidP( new std::string );
        *convertStringP( var ) = str;
        type = TSTRING;
     }
-    Var::Var( string x )
+    Var::Var( std::string& x )
     {
-        var = convertVoidP( new string );
+        var = convertVoidP( new std::string );
         *convertStringP( var ) = x;
         type = TSTRING;
     }
@@ -140,7 +178,7 @@ namespace wiz {
         *convertBoolP( var ) = x;
         type = TBOOL;
     }
-    Var:: Var( wizObject& x )
+    Var::Var( wizObject& x )
     {
         var = convertVoidP( x.clone() );
         type = TOBJECT;
@@ -162,8 +200,8 @@ namespace wiz {
             delete convertObjectP( var ); break;
         case TNOTDEFINE:
             break;
-        default:
-            throw wizVarError(); // err
+		//default:
+            // throw wizVarError(); // err
         }
     }
 
@@ -185,11 +223,11 @@ namespace wiz {
             case TOBJECT:
                 bSuccess = get( *convertObjectP( data ) ); break; // check err.
                 break;
-            default:
+            default: // TNOTDEFINE!
                 bSuccess = false; //
             }
         }
-        catch( exception e )
+        catch( std::exception e )
         {
             bSuccess = false;
         }
@@ -217,7 +255,7 @@ namespace wiz {
 
         return bSuccess;
     }
-    bool Var::get( string& x )const
+    bool Var::get( std::string& x )const
     {
         bool bSuccess = false;
 
@@ -241,7 +279,7 @@ namespace wiz {
 
         return bSuccess;
     }
-    bool Var::get( wizObject& x )const
+    bool Var::get( wiz::wizObject& x )const
     {
         bool bSuccess = false;
 
@@ -276,7 +314,7 @@ namespace wiz {
                 bSuccess = false; //
             }
         }
-        catch( exception e )
+        catch( std::exception e )
         {
             bSuccess = false;
         }
@@ -312,12 +350,12 @@ namespace wiz {
         }
         return bSuccess;
     }
-    bool Var::set( string x )
+    bool Var::set( std::string x )
     {
         bool bSuccess = false;
         if( TNOTDEFINE == type )
         {
-            var = new string;
+            var = new std::string;
             type = TSTRING;
         }
         if( TSTRING == type )
@@ -363,8 +401,8 @@ namespace wiz {
         return bSuccess;
     }
 
-    // toString
-    string Var::toString()const
+    // toString -> pair<bool, std::string> ?
+    std::string Var::toString()const
     {
         switch( type )
         {

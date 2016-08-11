@@ -4,10 +4,12 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 using namespace std;
 
 #include <wiz/stacks.h>
 #include <wiz/load_data_types.h>
+#include <wiz/load_data_utility.h>
 
 namespace wiz {
 	namespace load_data {
@@ -28,114 +30,15 @@ namespace wiz {
 				Init(condition);
 			}
 		private:
-			string reverse(const string& str) {
-				string temp;
-				for (int i = str.size() - 1; i >= 0; --i) {
-					temp.push_back(str[i]);
-				}
-				return temp;
+			string reverse(string str) { /// to std::reverse ?
+				std::reverse(str.begin(), str.end());
+				return str;
 			}
-			bool IsInteger(const string& str) {
-				int state = 0;
-				for (int i = 0; i < str.size(); ++i) {
-					switch (state)
-					{
-					case 0:
-						if ('+' == str[i] || '-' == str[i]) {
-							state = 0;
-						}
-						else if (str[i] >= '0' && str[i] <= '9')
-						{
-							state = 1;
-						}
-						else return false;
-						break;
-					case 1:
-						if (str[i] >= '0' && str[i] <= '9') {
-							state = 1;
-						}
-						else return false;
-					}
-				}
-				return true;
-			}
-			bool IsDouble(const string& str) {
-				int state = 0;
-				for (int i = 0; i < str.size(); ++i) {
-					switch (state)
-					{
-					case 0:
-						if ('+' == str[i] || '-' == str[i]) {
-							state = 0;
-						}
-						else if (str[i] >= '0' && str[i] <= '9')
-						{
-							state = 1;
-						}
-						else return false;
-						break;
-					case 1:
-						if (str[i] >= '0' && str[i] <= '9') {
-							state = 1;
-						}
-						else if (str[i] == '.') {
-							state = 2;
-						}
-						else return false;
-						break;
-					case 2:
-						if (str[i] >= '0' && str[i] <= '9') { state = 2; }
-						else return false;
-						break;
-					}
-				}
-				return true;
-			}
-			bool IsDate(const string& str)
-			{
-				int state = 0;
-				for (int i = 0; i < str.size(); ++i) {
-					switch (state)
-					{
-					case 0:
-						if (str[i] >= '0' && str[i] <= '9')
-						{
-							state = 1;
-						}
-						else return false;
-						break;
-					case 1:
-						if (str[i] >= '0' && str[i] <= '9') {
-							state = 1;
-						}
-						else if (str[i] == '.') {
-							state = 2;
-						}
-						else return false;
-						break;
-					case 2:
-						if (str[i] >= '0' && str[i] <= '9') { state = 2; }
-						else if (str[i] == '.') {
-							state = 3;
-						}
-						else return false;
-						break;
-					case 3:
-						if (str[i] >= '0' && str[i] <= '9') { state = 3; }
-						else return false;
-						break;
-					}
-				}
-				return true;
-			}
-			bool IsMinus(const string& str)
-			{
-				return str.empty() == false && str[0] == '-';
-			}
+			
 			string GetType(const string& str) {
-				if (IsInteger(str)) { return "INTEGER"; }
-				else if (IsDouble(str)) { return "DOUBLE"; }
-				else if (IsDate(str)) { return "DATE"; }
+				if (Utility::IsInteger(str)) { return "INTEGER"; }
+				else if (Utility::IsDouble(str)) { return "DOUBLE"; }
+				else if (Utility::IsDate(str)) { return "DATE"; }
 				else return "STRING";
 			}
 			string Compare(const string& str1, const string& str2, const int type = 0)
@@ -159,10 +62,10 @@ namespace wiz {
 				}
 				else if ("INTEGER" == type1)
 				{
-					if (IsMinus(str1) && !IsMinus(str2)) { return "< 0"; }
-					else if (!IsMinus(str1) && IsMinus(str2)) { return "> 0"; }
+					if (Utility::IsMinus(str1) && !Utility::IsMinus(str2)) { return "< 0"; }
+					else if (!Utility::IsMinus(str1) && Utility::IsMinus(str2)) { return "> 0"; }
 
-					const bool minusComp = IsMinus(str1) && IsMinus(str2);
+					const bool minusComp = Utility::IsMinus(str1) && Utility::IsMinus(str2);
 
 					if (false == minusComp) {
 						string x = reverse(str1);
@@ -255,17 +158,18 @@ namespace wiz {
 						utTemp = global;
 					}
 				}
-				return Utility::Find(utTemp, valTemp);
+				return UserType::Find(utTemp, valTemp);
 			}
 			string GetValue(const string& op, const string& var, const string& val, UserType* utPosition, UserType* global, const string& option = "0")
 			{
+				/// ExistItem, ExistUserType
 				if (NULL == utPosition) { return "ERROR"; }
-				if ("EXIST" == op) { /// option == 1?	
+				if ("EXISTITEM" == op) { /// option == 1?	
 					auto x = Get(var, val, utPosition, global);
 					if (x.first) {
 						//if (x.second.size() > 1) { return "ERROR"; } ///
 						for (int i = 0; i < x.second.size(); ++i) {
-							if (x.second[i]->GetItem(var).GetCount() > 0)
+							if (x.second[i]->GetItem(var).size() > 0)
 							{
 								return "TRUE";
 							}
@@ -274,13 +178,42 @@ namespace wiz {
 					}
 					return "FALSE";
 				}
-				else if ("NOTEXIST" == op) { /// option == 2 ?
+				else if ("EXISTUSERTYPE" == op) { /// option == 1?	
+					auto x = Get(var, val, utPosition, global);
+					if (x.first) {
+						//if (x.second.size() > 1) { return "ERROR"; } ///
+						for (int i = 0; i < x.second.size(); ++i) {
+							if (x.second[i]->GetUserTypeItem(var).size() > 0)
+							{
+								return "TRUE";
+							}
+						}
+						return "FALSE";
+					}
+					return "FALSE";
+				}
+				else if ("NOTEXISTITEM" == op) { /// option == 2 ?
 					auto x = Get(var, val, utPosition, global);
 					if (x.first) {
 						//if (x.second.size() > 1) { return "ERROR"; } ///
 
 						for (int i = 0; i < x.second.size(); ++i) {
-							if (0 < x.second[i]->GetItem(var).GetCount())
+							if (0 < x.second[i]->GetItem(var).size())
+							{
+								return "FALSE";
+							}
+						}
+						return "TRUE";
+					}
+					return "FALSE";
+				}
+				else if ("NOTEXISTUSERTYPE" == op) { /// option == 2 ?
+					auto x = Get(var, val, utPosition, global);
+					if (x.first) {
+						//if (x.second.size() > 1) { return "ERROR"; } ///
+
+						for (int i = 0; i < x.second.size(); ++i) {
+							if (0 < x.second[i]->GetUserTypeItem(var).size())
 							{
 								return "FALSE";
 							}
@@ -303,19 +236,19 @@ namespace wiz {
 
 				if ("~" != position1 && false == x.first)
 				{
-					return "ERROR";
+					return "ERROR GV1";
 				}
 				if ("~" != position2 && false == y.first)
 				{
-					return "ERROR";
+					return "ERROR GV2";
 				}
 				//
 				if (((x.first && x.second.size() > 1) || (y.first && y.second.size() > 1))) {
-					return "ERROR";
+					return "ERROR GV3";
 				}
 
-				TypeArray<string> value1; 
-				TypeArray<string> value2;
+				vector<TypeArray<string>> value1;  // Item<string> <- 
+				vector<TypeArray<string>> value2;
 				
 				// added..
 				if (position1 != "~") {
@@ -325,22 +258,32 @@ namespace wiz {
 					value2 = y.second[0]->GetItem(var2);
 				}
 				//
-				if (value1.GetCount() == 0) {
-					value1.Push(var1);
+				if (position1 == "~" ) {
+					value1.push_back(TypeArray<string>(var1));
+					value1[0].Push(var1);
 				}
-				if (value2.GetCount() == 0) {
-					value2.Push(var2);
+				if (position2 == "~") {
+					value2.push_back(TypeArray<string>(var2));
+					value2[0].Push(var2);
 				}
 
-				if (option == "0" && (value1.GetCount() > 1 || value2.GetCount() > 1)) {
-					return "ERROR";
+				//
+				if (value1.size() == 0) {
+					return "ERROR GV4";
+				}
+				if (value2.size() == 0) {
+					return "ERROR GV5";
+				}
+
+				if (option == "0" && (value1.size() > 1 || value2.size() > 1)) {
+					return "ERROR GV6";
 				}
 
 				if ("COMP<" == op) {
 					if ("0" != option) { /// ToDo.. // 0. just 1-1, // 1. for any case // 2. for all case
-						for (int i = 0; i < value1.GetCount(); ++i) {
-							for (int j = 0; j < value2.GetCount(); ++j) {
-								if (Compare(value1.Get(i), value2.Get(j)) == "< 0") {
+						for (int i = 0; i < value1.size(); ++i) {
+							for (int j = 0; j < value2.size(); ++j) {
+								if (Compare(value1[i].Get(0), value2[j].Get(0)) == "< 0") {
 									if ("1" == option) { return "TRUE"; }
 								}
 								else {
@@ -354,7 +297,33 @@ namespace wiz {
 						}
 					}
 					else {
-						if (Compare(value1.Get(0), value2.Get(0)) == "< 0") {
+						if (Compare(value1[0].Get(0), value2[0].Get(0)) == "< 0") {
+							return "TRUE";
+						}
+					}
+					return "FALSE";
+				}
+				else if ("COMP<EQ" == op) {
+					if ("0" != option) { /// ToDo.. // 0. just 1-1, // 1. for any case // 2. for all case
+						for (int i = 0; i < value1.size(); ++i) {
+							for (int j = 0; j < value2.size(); ++j) {
+								string temp = Compare(value1[i].Get(0), value2[j].Get(0));
+									if (temp == "< 0" || temp == "== 0") {
+										if ("1" == option) { return "TRUE"; }
+									}
+									else {
+										if ("2" == option) { return "FALSE"; }
+									}
+							}
+						}
+						if ("1" == option) { return "FALSE"; }
+						else if ("2" == option) {
+							return "TRUE";
+						}
+					}
+					else {
+						string temp = Compare(value1[0].Get(0), value2[0].Get(0));
+						if (temp == "< 0" || temp == "== 0") {
 							return "TRUE";
 						}
 					}
@@ -362,9 +331,9 @@ namespace wiz {
 				}
 				else if ("COMP>" == op) {
 					if ("0" != option) { /// ToDo.. // 0. just 1-1, // 1. for any case // 2. for all case
-						for (int i = 0; i < value1.GetCount(); ++i) {
-							for (int j = 0; j < value2.GetCount(); ++j) {
-								if (Compare(value1.Get(i), value2.Get(j)) == "> 0") {
+						for (int i = 0; i < value1.size(); ++i) {
+							for (int j = 0; j < value2.size(); ++j) {
+								if (Compare(value1[i].Get(0), value2[j].Get(0)) == "> 0") {
 									if ("1" == option) { return "TRUE"; }
 								}
 								else {
@@ -378,7 +347,33 @@ namespace wiz {
 						}
 					}
 					else {
-						if (Compare(value1.Get(0), value2.Get(0)) == "> 0") {
+						if (Compare(value1[0].Get(0), value2[0].Get(0)) == "> 0") {
+							return "TRUE";
+						}
+					}
+					return "FALSE";
+				}
+				else if ("COMP>EQ" == op) {
+					if ("0" != option) { /// ToDo.. // 0. just 1-1, // 1. for any case // 2. for all case
+						for (int i = 0; i < value1.size(); ++i) {
+							for (int j = 0; j < value2.size(); ++j) {
+								string temp = Compare(value1[i].Get(0), value2[j].Get(0));
+								if (temp == "> 0" || temp == "== 0") {
+									if ("1" == option) { return "TRUE"; }
+								}
+								else {
+									if ("2" == option) { return "FALSE"; }
+								}
+							}
+						}
+						if ("1" == option) { return "FALSE"; }
+						else if ("2" == option) {
+							return "TRUE";
+						}
+					}
+					else {
+						string temp = Compare(value1[0].Get(0), value2[0].Get(0));
+						if (temp == "> 0" || temp == "== 0") {
 							return "TRUE";
 						}
 					}
@@ -386,9 +381,9 @@ namespace wiz {
 				}
 				else if ("EQ" == op) {
 					if ("0" != option) { /// ToDo.. // 0. just 1-1, // 1. for any case // 2. for all case
-						for (int i = 0; i < value1.GetCount(); ++i) {
-							for (int j = 0; j < value2.GetCount(); ++j) {
-								if (Compare(value1.Get(i), value2.Get(j)) == "== 0") {
+						for (int i = 0; i < value1.size(); ++i) {
+							for (int j = 0; j < value2.size(); ++j) {
+								if (Compare(value1[i].Get(0), value2[j].Get(0)) == "== 0") {
 									if ("1" == option) { return "TRUE"; }
 								}
 								else {
@@ -402,7 +397,7 @@ namespace wiz {
 						}
 					}
 					else {
-						if (Compare(value1.Get(0), value2.Get(0)) == "== 0") {
+						if (Compare(value1[0].Get(0), value2[0].Get(0)) == "== 0") {
 							return "TRUE";
 						}
 					}
@@ -410,9 +405,9 @@ namespace wiz {
 				}
 				else if ("NOTEQ" == op) {
 					if ("0" != option) { /// ToDo.. // 0. just 1-1, // 1. for any case // 2. for all case
-						for (int i = 0; i < value1.GetCount(); ++i) {
-							for (int j = 0; j < value2.GetCount(); ++j) {
-								if (Compare(value1.Get(i), value2.Get(j)) != "== 0") {
+						for (int i = 0; i < value1.size(); ++i) {
+							for (int j = 0; j < value2.size(); ++j) {
+								if (Compare(value1[i].Get(0), value2[j].Get(0)) != "== 0") {
 									if ("1" == option) { return "TRUE"; }
 								}
 								else {
@@ -426,14 +421,14 @@ namespace wiz {
 						}
 					}
 					else {
-						if (Compare(value1.Get(0), value2.Get(0)) != "== 0") {
+						if (Compare(value1[0].Get(0), value2[0].Get(0)) != "== 0") {
 							return "TRUE";
 						}
 					}
 					return "FALSE";
 				}
 
-				return "ERROR";
+				return "ERROR GV7";
 			}
 			string BoolOperation(const string& op, const string& x, const string& y)
 			{
@@ -456,7 +451,7 @@ namespace wiz {
 				}
 			}
 
-			void Init(const string condition)
+			void Init(const string& condition)
 			{
 				bool evalue = false;
 
@@ -464,7 +459,11 @@ namespace wiz {
 				StringTokenizer tokenizer(str, { " ", "\t", "\n", "\r" });
 
 				while (tokenizer.hasMoreTokens()) {
-					tokenVec.push_back(tokenizer.nextToken());
+					string temp = tokenizer.nextToken();
+					if (temp == "^") {
+						temp = "";
+					}
+					tokenVec.push_back(temp);
 				}
 			}
 		public:
@@ -487,9 +486,11 @@ namespace wiz {
 						else if ("}" == tokenVec[i]) {
 							braceNum--;
 
-							// COMP<, COMP>, EQ, NOTEQ
+							// COMP<, COMP<EQ, COMP>, COMP>EQ, EQ, NOTEQ
 							if (tokenStack.size() >= 6 && ("COMP<" == tokenStack[tokenStack.size() - 6]
+								|| "COMP<EQ" == tokenStack[tokenStack.size() - 6]
 								|| "COMP>" == tokenStack[tokenStack.size() - 6]
+								|| "COMP>EQ" == tokenStack[tokenStack.size() - 6]
 								|| "EQ" == tokenStack[tokenStack.size() - 6]
 								|| "NOTEQ" == tokenStack[tokenStack.size() - 6]))
 							{
@@ -520,7 +521,7 @@ namespace wiz {
 
 									tokenStack.push(BoolOperation(op, operand1, operand2));
 								}
-								else { // EXIST, NOTEXIST 
+								else { // EXIST, NOTEXIST for ( ITEM or USERTYPE ) 
 									tokenStack.pop();
 									tokenStack.pop();
 									tokenStack.pop();
@@ -548,7 +549,7 @@ namespace wiz {
 			int NowIndex()const { return i; }
 			const ArrayStack<string>& Now()const { return tokenStack; }
 			ArrayStack<string>& Now() { return tokenStack; }
-			bool IsNowImportant() const {
+			bool IsNowImportant() const { // ??
 				return "}" == tokenVec[i] && "NOT" != tokenStack[tokenStack.size() - 2];
 			}
 		};

@@ -100,8 +100,6 @@ public:
 	}
 	virtual ~WizSmartPtr() /// virtual??
 	{
-		if (ptr && print==1) { cout << "chk " << ptr->GetName() << " "; _getch(); }
-		
 		if (isOnlyOne())
 		{
 			remove(true);
@@ -201,16 +199,20 @@ public:
 public:
     bool operator!=( const WizSmartPtr<T, IS_SAME_VALUE>& wsp ) const
     {
-        return (ptr) != (wsp.ptr);
+        return (*ptr) != (*(wsp.ptr));
     }
-    bool operator==( const WizSmartPtr<T, IS_SAME_VALUE>& wsp ) const
+    bool operator==( const WizSmartPtr<T, IS_SAME_VALUE>& wsp ) const ///
     {
-        return (ptr) == (wsp.ptr);
+        return (*ptr) == (*(wsp.ptr));
     }
-    bool isSameValue( const WizSmartPtr<T, IS_SAME_VALUE>& wsp ) const
+    bool isSameValue( const WizSmartPtr<T, IS_SAME_VALUE>& wsp ) const /// 같은 값을 가지고 있는가?
     {
         return IS_SAME_VALUE()( (*ptr), (*wsp.ptr) );
     }
+	bool hasSameObject(const WizSmartPtr<T, IS_SAME_VALUE>& wsp) const
+	{
+		return ptr == wsp.ptr;
+	}
 };
 
 }
