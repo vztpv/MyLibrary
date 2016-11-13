@@ -19,17 +19,18 @@ namespace MGM // My Group Manager
 	private:
 		std::string name; // key
 		wiz::WizSmartPtr<T> value; // data
+		size_t order; // 0, 1, 2, ...
 	public:
-		explicit Item() : name("") { } // chk name="", 받아 들일 때!
-		explicit Item(const std::string& name, const T& value=T())
-			: name(name)
+		explicit Item() : name(""), order(0) { } // chk name="", 받아 들일 때!
+		explicit Item(const std::string& name, const T& value=T(), const size_t order=0)
+			: name(name), order(order)
 		{
 			wiz::WizSmartPtr<T> temp(new T());
 			this->value = temp;
 			*(this->value) = value;
 		}
-		explicit Item(const std::string name, const wiz::WizSmartPtr<T>& value)
-			: name(name)
+		explicit Item(const std::string& name, const wiz::WizSmartPtr<T>& value, const size_t order=0 )
+			: name(name), order(order)
 		{
 			this->value = value;
 		}
@@ -48,12 +49,15 @@ namespace MGM // My Group Manager
 		{
 			return this->name < other.name;
 		}
+		// new comp<  by order.
 	};
 	// ItemArray! name, (index, value)+ ?
 
 	template <class T>
 	class Group /// To Do Add 이동 생성자, 이동 대입 연산자.. // friend!!,일반적으로는 get만 가능하도록, friend를 통해서 set도 가능하게?
 	{
+	private:
+		size_t order;
 	public:
 		bool hasNoItem()const { return 0 == itemMemberN; }
 		bool hasNoGroup()const { return 0 == groupMemberN; }
@@ -70,8 +74,8 @@ namespace MGM // My Group Manager
 		int groupMemberN; // for binary search!
 	public:
 		explicit Group() { } // chk!! name = "", int =0, bool = false, 받아 들일 때!
-		explicit Group(const std::string& name, const int itemMemberMax=0, const int groupMemberMax=0)
-			: name(name), itemMemberN(0), groupMemberN(0)
+		explicit Group(const std::string& name, const int itemMemberMax=0, const int groupMemberMax=0, const size_t order=0)
+			: name(name), itemMemberN(0), groupMemberN(0), order(0)
 		{
 			// chk if itemMemberN > 0 ?
 			itemMember.reserve(itemMemberMax);
@@ -309,7 +313,7 @@ namespace MGM // My Group Manager
 
 				// cf) expand <> shrink?
 
-				groupMember[index].remove(bremove)
+				groupMember[index].remove(bremove);
 
 				renewalGroup(index);
 

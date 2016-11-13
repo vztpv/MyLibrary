@@ -28,7 +28,7 @@ namespace wiz{
 
             return -1;
         }
-        static bool Comp( const char* cstr1, const char* cstr2, const int n ) /// isSameData?
+        static bool Comp( const char* cstr1, const char* cstr2, const int n ) /// isSameData
         {
             for( int i=0; i < n; i++ )
             {
@@ -36,7 +36,7 @@ namespace wiz{
             }
             return true;
         }
-        static bool Comp( const string& str1, const string& str2, const int n ) /// isSameData?
+        static bool Comp( const string& str1, const string& str2, const int n ) /// isSameData
         {
             for( int i=0; i < n; i++ )
             {
@@ -87,24 +87,6 @@ namespace wiz{
 			auto idx = str.find(str1, fromIndex);
 			if (idx == std::string::npos) { return{ false, 0 }; }
 			return{ true, idx };
-
-/*
-            /// chk fromIndex...
-            if( str1.empty() ) { return -1; }
-            const char* pStr = str.c_str();
-            string result;
-
-            for( int i=fromIndex; i <= str.size() - str1.size(); i++ ) {
-                const int n = strlen( pStr+i );
-                if( n >= str1.size()
-                   && Comp( pStr+i, str1.c_str(), str1.size() ) )
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-            **/
         }
         static auto indexOf(const string& str, const string& str1 )
         {
@@ -157,21 +139,6 @@ namespace wiz{
         static string substring( const string& str, const int start, const int last )
         {
             return str.substr( start, last-start+1 );
-            /*
-            if( str.empty() ) { return string(); }
-            char* buf = new char[str.size()+1];
-
-            int count = 0;
-            for(int i=start; i <= last; i++ ) /// cf) i <=end - why??
-            {
-                buf[count++] = str[i];
-            }
-            buf[count] = '\0';
-            string temp = buf;
-            delete[] buf;
-
-            return temp;
-            */
         }
         static string substring( const string& str, const int start )
         {
@@ -185,10 +152,11 @@ namespace wiz{
         static bool endsWith( const string& str, const string& last )
         {
             if( str.size() < last.size() ) { return false; }
-            if( last.empty() ) { return true; } /// chk... return false; ??
+            if( last.empty() ) { return true; } /// chk... return false; 
             return Comp(  str.c_str() + ( str.size() - last.size() ), last.c_str(), last.size() );
         }
     };
+
     class StringTokenizer
     {
     private:
@@ -198,34 +166,132 @@ namespace wiz{
     private:
         void Init( const string& str, const vector<string>& separator )
         {
-            if( separator.empty() || str.empty() ) { return; }
-            std::pair<bool, size_t> idx; int k = 0;
-            int i=0; int select=-1;
-            string tempStr;
+            if( separator.empty() || str.empty() ) { return; } // if str.empty() == false then _m_str.push_back(str); // ?
+			vector<int> arr(str.size(), 0);
+			bool noSeparator = true;
 
-            //_m_str.reserve( str.size() );
+			for (int i = 0; i < str.size(); ++i) {
+				bool pass = false;
+				for (int j = 0; j < separator.size(); ++j) {
+					for (int k = 0; k < separator[j].size(); ++k) {
+						if (str[i] == separator[j][k]) {
+							pass = true;
+						}
+						else {
+							pass = false;
+							break;
+						}
+					}
+					if (pass) {
+						noSeparator = false;
+						//for (int k = i; k < i + separator[j].size(); ++k) {
+						//	arr[k] = true;
+					//	}
+						arr[i]++;
+						arr[i + separator[j].size() - 1]++;
+						i = i + separator[j].size() - 1;
 
-            while(true) {
-                int counter_minus1 = 0;
-                k = str.size(); ///
-				idx.first = false; idx.second = 0; select = 0; ///
-                for( int j = 0; j < separator.size(); j++ ) {
-                    idx = String::indexOf( str, separator[j], i );
+						break;
+					}
+				}
+			}
+			
+			if( noSeparator )
+			{
+				_m_str.push_back(str);
+				//exist = true;
+				return;
+			}
+			int state = 0;
+			int left = 0; int right = 0;
+			for (int i = 0; i < arr.size(); ++i) {
+				if (state == 0 && 0 == arr[i]) {
+					left = i;
+					right = i;
+					state = 1;
+				}
+				else if (state == 0 && 1 == arr[i]) {
+					state = 2;
+				}
+				else if (state == 0 && 2 == arr[i]) {
+					state = 3;
+				}
+				else if (state == 1 && 0 == arr[i]) {
+					right = i;
+				}
+				else if (state == 1 && 0 < arr[i]) {
+					_m_str.push_back(wiz::String::substring(str, left, right));
 
-                    if( false == idx.first ) { counter_minus1++; }
-                    if( false == idx.first && counter_minus1 == separator.size() ) {
-                        tempStr = String::substring( str, i );
-                        if( !tempStr.empty() ) { _m_str.push_back( tempStr ); }
-                       // vector<string>( _m_str ).swap( _m_str );
-                        return;
-                    }
-					if (idx.first) { exist = true; if (k > idx.second) { select = j; k = idx.second; } } /// idx가 같다면 가장 처음에 나온것이 선택된다. -> 길이가 긴 것을 우선시 해야한다?
-                }
-                tempStr = String::substring( str, i, k-1 );
-                if( !tempStr.empty() ) { _m_str.push_back( tempStr ); }
-                i = k + separator[select].size();
-            }
+					exist = true;
+					if (1 == arr[i]) {
+						state = 2;
+					}
+					else if (2 == arr[i]) {
+						state = 3;
+					}
+				}
+				else if (state == 2) {
+					if (1 == arr[i]) {
+						state = 0;
+					}
+				}
+				else if (state == 3) {
+					state = 0;
+					--i;
+				}
+			}
+			if (state == 1 && 0 == arr[arr.size()-1]) {
+				right = arr.size() - 1;
+				_m_str.push_back(wiz::String::substring(str, left, right));
+				
+				exist = true;
+				state = 0;
+			}
         }
+		/*
+		void Init(const string& str, const vector<string>& separator)
+		{
+			if (separator.empty() || str.empty()) { return; }
+			std::pair<bool, size_t> idx; int k = 0;
+			int i = 0; int select = -1;
+			string tempStr;
+
+			//_m_str.reserve( str.size() );
+			vector<int> arr(separator.size(), 0);
+
+			while (true) {
+				int counter_minus1 = 0;
+				k = str.size(); /// �乮���� �ڷ�??
+				idx.first = false; idx.second = 0; select = 0; ///
+				for (int j = 0; j < separator.size(); j++) {
+					if (-1 == arr[j]) {
+						counter_minus1++;
+						if (counter_minus1 == separator.size()) {
+							tempStr = String::substring(str, i);
+							if (!tempStr.empty()) { _m_str.push_back(std::move(tempStr)); }
+							return;
+						}
+						continue;
+					}
+
+					idx = String::indexOf(str, separator[j], i);
+
+					if (false == idx.first) { arr[j] = -1; }
+
+					if (false == idx.first) { counter_minus1++; }
+					if (false == idx.first && counter_minus1 == separator.size()) {
+						tempStr = String::substring(str, i);
+						if (!tempStr.empty()) { _m_str.push_back(std::move(tempStr)); }
+						return;
+					}
+					if (idx.first) { exist = true; if (k >= idx.second) { select = j; k = idx.second; } }
+				}
+				tempStr = String::substring(str, i, k - 1);
+				if (!tempStr.empty()) { _m_str.push_back(std::move(tempStr)); }
+				i = k + separator[select].size();
+			}
+		} 
+    	*/
     public:
         explicit StringTokenizer() : count(0), exist(false) { }
         explicit StringTokenizer( const string& str, const string& separator )
@@ -271,49 +337,6 @@ namespace wiz{
 		}
 
     };
-    /*
-    class StringTokenizer
-    {
-    private:
-        vector<string> _m_str;
-        int count;
-    public:
-        explicit StringTokenizer() :count(0) { }
-        explicit StringTokenizer( const string& str, const string& separator  )
-        : count( 0 )
-        {
-            if( separator.empty() || str.empty() ) { return; }
-            int idx = 0;
-            int i=0;
-            string tempStr;
 
-            while(true)
-            {
-                idx = String::indexOf( str, separator , i );
-                if( -1 == idx ) {
-                    tempStr = String::substring( str, i );
-                    if( !tempStr.empty() ) { _m_str.push_back( tempStr ); }
-                    break;
-                }
-                tempStr = String::substring( str, i, idx-1 );
-                if( !tempStr.empty() ) { _m_str.push_back( tempStr ); }
-                i = idx + separator.size();
-            }
-        }
-        int countTokens()const
-        {
-            return _m_str.size();
-        }
-        string nextToken()
-        {
-            return _m_str[count++];
-        }
-        bool hasMoreTokens()const
-        {
-            return count < _m_str.size();
-        }
-
-    };
-}*/
 }
 #endif // CPP_STRING_H_INCLUDED

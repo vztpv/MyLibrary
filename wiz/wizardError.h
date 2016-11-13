@@ -88,7 +88,7 @@ inline void checkOverError( int variableNo, const int x, const int max ){
 
 /**
 * To Do
-* assert -> debug == 1 ì¼ëŒ€ë§Œ, using #if, #endif
+* assert -> debug == 1 ?¼ë?ë§? using #if, #endif
 * and throw..!!
 */
 // cf) using function call
@@ -108,9 +108,9 @@ template <typename T>
  void assertFalse( int expected );
 
 /// of course,  below T are Pointer Type !!!
-template <typename T> // pointer ë§Œ..
+template <typename T> // pointer ë§?.
  void assertNULL( string message, T expected  );
-template <typename T> // pointer ë§Œ..
+template <typename T> // pointer ë§?.
  void assertNULL( T expected  );
 template <typename T>
  void assertNotNULL( string message, T expected );
@@ -189,7 +189,7 @@ inline void assertFalse( int expected ){
 }
 
 /// of course,  below T are Pointer Type !!!
-template <typename T> // pointer ë§Œ..
+template <typename T> // pointer ë§?.
 inline void assertNULL( string message, T expected  ){
     if( expected == NULL ){
     }
@@ -198,7 +198,7 @@ inline void assertNULL( string message, T expected  ){
     }
 
 }
-template <typename T> // pointer ë§Œ..
+template <typename T> // pointer ë§?.
 inline void assertNULL( T expected  ){
     assertNULL( "is not NULL", expected );
 }

@@ -9,6 +9,7 @@
 #include <algorithm>
 using namespace std;
 
+#include <wiz/cpp_string.h>
 //#include <wiz/load_data_types.h> /// 
 
 namespace wiz {
@@ -41,6 +42,71 @@ namespace wiz {
 				}
 				return 1 == state; /// chk..
 			}
+			static bool IsNumberInJson(const string& str)
+			{
+				int state = 0;
+				for (int i = 0; i < str.size(); ++i) {
+					switch (state)
+					{
+					case 0:
+						if ( // '+' == str[i] || // why can`t +
+							'-' == str[i]
+							) {
+							state = 0;
+						}
+						else if (str[i] >= '0' && str[i] <= '9')
+						{
+							state = 1;
+						}
+						else { return false; }
+						break;
+					case 1:
+						if (str[i] >= '0' && str[i] <= '9') {
+							state = 1;
+						}
+						else if (str[i] == '.') {
+							state = 2;
+						}
+						else { return false; }
+						break;
+					case 2:
+						if (str[i] >= '0' && str[i] <= '9') { state = 3; }
+						else { return false; }
+						break;
+					case 3:
+						if (str[i] >= '0' && str[i] <= '9') { state = 3; }
+						else if ('e' == str[i] || 'E' == str[i]) {
+							state = 4;
+						}
+						else { return false; }
+						break;
+					case 4:
+						if (str[i] == '+' || str[i] == '-') {
+							state = 5;
+						}
+						else {
+							state = 5;
+						}
+						break;
+					case 5:
+						if (str[i] >= '0' && str[i] <= '9') {
+							state = 6;
+						}
+						else {
+							return false;
+						}
+						break;
+					case 6:
+						if (str[i] >= '0' && str[i] <= '9') {
+							state = 6;
+						}
+						else {
+							return false;
+						}
+					}
+				}
+				return 3 == state || 6 == state;
+			}
 			static bool IsDouble(const string& str) {
 				int state = 0;
 				for (int i = 0; i < str.size(); ++i) {
@@ -54,7 +120,7 @@ namespace wiz {
 						{
 							state = 1;
 						}
-						else return false;
+						else { return false; }
 						break;
 					case 1:
 						if (str[i] >= '0' && str[i] <= '9') {
@@ -63,19 +129,45 @@ namespace wiz {
 						else if (str[i] == '.') {
 							state = 2;
 						}
-						else return false;
+						else { return false; }
 						break;
 					case 2:
 						if (str[i] >= '0' && str[i] <= '9') { state = 3; }
-						else return false;
+						else { return false; }
 						break;
 					case 3:
 						if (str[i] >= '0' && str[i] <= '9') { state = 3; }
-						else return false;
+						else if ('e' == str[i] || 'E' == str[i]) {
+							state = 4;
+						}
+						else { return false; }
 						break;
+					case 4:
+						if (str[i] == '+' || str[i] == '-') {
+							state = 5;
+						}
+						else {
+							state = 5;
+						}
+						break;
+					case 5:
+						if (str[i] >= '0' && str[i] <= '9') {
+							state = 6;
+						}
+						else {
+							return false;
+						}
+						break;
+					case 6:
+						if (str[i] >= '0' && str[i] <= '9') {
+							state = 6;
+						}
+						else {
+							return false;
+						}
 					}
 				}
-				return 3 == state;
+				return 3 == state || 6 == state;
 			}
 			static bool IsDate(const string& str)
 			{
@@ -266,6 +358,27 @@ namespace wiz {
 				return retVal;
 			}
 		public:
+			static bool ChkExist(const string& str) /// has bug?, unstatble?
+			{
+				int state = -1;
+
+				for (string::size_type i = 0; i < str.size(); ++i)
+				{
+					if (0 >= state && i == 0 && '\"' == str[i]) {
+						state = 1;
+					}
+					else if (0 >= state && i > 0 && '\"' == str[i] && '\\' != str[i - 1])
+					{
+						state = 1;
+					}
+					else if (1 == state && i > 0 && '\\' != str[i - 1] && '\"' == str[i]) {
+						state = 0;
+					}
+				}
+
+				return 0 == state;
+			}
+		public:
 			static pair<bool, int> Reserve2(ifstream& inFile, ArrayQueue<string>& aq, const int num = 1)
 			{
 				int count = 0;
@@ -275,15 +388,27 @@ namespace wiz {
 				
 				for (int i = 0; i < num && (getline(inFile,temp)); ++i) {
 					//temp = RemoveEndSpace(temp);
+					bool chkStr = ChkExist(temp);
+					if (chkStr) {
+						temp = ChangeStr(temp, "^", "^0"); // 1줄에 "~~~" ?	
+						temp = Utility::ChangeStr(temp, "#", "^5");
+					}
+					
 					temp = PassSharp(temp);
 					temp = AddSpace(temp);
-					temp = ChangeSpace(temp, '^'); 
+					
+					if (chkStr) {
+						temp = ChangeStr(temp, " ", "^1");
+						temp = ChangeStr(temp, "\t", "^2");
+						temp = ChangeStr(temp, "\r", "^3");
+						temp = ChangeStr(temp, "\n", "^4");
+					}
 
 					strVecTemp.push_back(temp);
 					count++;
 				}
 
-				if (count >= 4) {
+				if (count >= 100) { // 4 ?
 					DoThread dtA(&strVecTemp, &arrayQueue[0], 0, count / 4 - 1),
 						dtB(&strVecTemp, &arrayQueue[1], count / 4, (count / 4) * 2 - 1),
 						dtC(&strVecTemp, &arrayQueue[2], (count / 4) * 2, (count / 4) * 3 - 1),
@@ -321,34 +446,7 @@ namespace wiz {
 				}
 				return{ count > 0, count };
 			}
-			/*
-			pair< bool, int > Reserve(ifstream& inFile, ArrayQueue<string>& strVec, const int lineNum = 1)
-			{
-			int count = 0; // string num : not valid line num!
-			pair<bool, bool> prTemp(false, false);
-
-			for (int i = 0; i < lineNum; ++i) {
-			ArrayQueue<string> temp;
-			bool b1 = prTemp.first;
-			bool b2 = prTemp.second;
-			pair<bool, bool> bbTemp = PassSharp(inFile, temp);
-			if (bbTemp.second) {
-			for (int i = 0; i < temp.size(); ++i) {
-			const string str = temp[i];
-			StringTokenizer tokenizer(str, vector<string>{ " ", "\t", "\r", "\n" });
-			for (int k = 0; k < tokenizer.countTokens(); ++k) {
-			string str = tokenizer.nextToken();
-			strVec.push(str);
-			}
-			count = count + tokenizer.countTokens();
-			}
-			}
-			prTemp.first = b1 || bbTemp.first;
-			}
-
-			return{ prTemp.first, count };
-			}
-			*/
+			
 			static const string& Top(const ArrayQueue<string>& strVec)
 			{
 				return strVec[0];
@@ -381,7 +479,7 @@ namespace wiz {
 				}
 				return{ true, strVec[idx] };
 			}
-			/// must strVec[start] == up or down?
+			/// must strVec[start] == up or down
 			/// now not use!!
 			static pair<bool, int> IsMatched(const ArrayQueue<string>& strVec, const string& up, const string& down, const int start = 0, const int start_num = 0, int* pidx = NULL, int*pnum = NULL)
 			{
@@ -410,7 +508,7 @@ namespace wiz {
 		public:
 
 			// To Do
-			// AddSpace : return string?
+			// AddSpace : return string
 			static string AddSpace(const string& str)
 			{
 				string temp;
@@ -440,6 +538,7 @@ namespace wiz {
 
 				return temp;
 			}
+
 			/// need testing!
 			static string PassSharp(const string& str) {
 				string temp;
@@ -455,22 +554,30 @@ namespace wiz {
 				}
 				return temp;
 			}
-			/// need to rename!, has bug.., line 기준..
-			static string ChangeSpace(const string& str, const char result_ch) {
+	
+			static string ChangeStr(const string& str, const string& changed_str, const string& result_str) {
 				string temp;
 				int state = 0;
 
-				for (int i = 0; i < str.size(); ++i)
+				//temp.reserve(str.size() * 2);
+
+				for (string::size_type i = 0; i < str.size(); ++i)
 				{
-					if (0 == state && '\"' == str[i]) {
+					if (0 == state && i == 0 && '\"' == str[i]) {
 						state = 1;
 						temp.push_back(str[i]);
 					}
-					else if (1 == state && '\"' != str[i] && (' ' == str[i] || '\t' == str[i])) {
+					else if (0 == state && i > 0 && '\"' == str[i] && '\\' != str[i-1])
+					{
 						state = 1;
-						temp.push_back(result_ch);
+						temp.push_back(str[i]);
 					}
-					else if (1 == state && '\"' == str[i]) {
+					else if (1 == state && (wiz::String::Comp( changed_str.c_str(), str.c_str()+i, changed_str.size()))) {
+						state = 1;
+						temp += result_str;
+						i = i + changed_str.size() - 1;
+					}
+					else if (1 == state && i > 0 && '\\' != str[i-1] && '\"' == str[i]) {
 						state = 0;
 						temp.push_back('\"');
 					}
@@ -480,18 +587,8 @@ namespace wiz {
 					}
 				}
 
+				//temp.shrink_to_fit();
 				return temp;
-			}
-
-			static void ChangeCharInString(string& str, const char target_ch, const char result_ch)
-			{
-				for (int i = 0; i < str.size(); ++i)
-				{
-					if (str[i] == target_ch)
-					{
-						str[i] = result_ch;
-					}
-				}
 			}
 
 		};
